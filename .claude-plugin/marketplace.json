@@ -1,0 +1,13 @@
+{
+  "name": "tkflow-plugins",
+  "owner": {
+    "name": "Ted Kim"
+  },
+  "plugins": [
+    {
+      "name": "tkflow",
+      "source": "./",
+      "description": "Obsidian-first blueprints, vertical slices, and fresh-agent continuation"
+    }
+  ]
+}

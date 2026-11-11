@@ -1,0 +1,20 @@
+{
+  "name": "tkflow-plugins",
+  "interface": {
+    "displayName": "tkflow"
+  },
+  "plugins": [
+    {
+      "name": "tkflow",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

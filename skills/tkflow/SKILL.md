@@ -5,11 +5,12 @@ description: Sketch, refine intent-rich blueprints, build vertical slices, and v
 # tkflow
 
 The durable project record must let a fresh agent continue without this conversation.
-Use the local tool at `~/.local/bin/tkflow`. When loaded from a native Pi package or
-another checkout without that installation, use `python3 <this-skill-directory>/scripts/run.py`
-as the runner for the same commands. Resolve the skill directory from the host's
-advertised location; do not assume another user's checkout path. Run `tkflow --help` for syntax and
-`tkflow doctor` before the first live operation. Default vault: `~/Documents/tkflow`.
+This workflow ships inside the tkflow plugin. Resolve this skill's directory from
+the host's advertised skill path, then use `node <this-skill-directory>/scripts/run.mjs`
+as the runner for every helper command below. References to `tkflow doctor`,
+`tkflow read`, etc. mean that runner followed by the command; no global helper
+installation is required. Node.js 22+ is required. Default vault: `~/Documents/tkflow`.
+Run the runner with `--help` for syntax and `doctor` before the first live operation.
 All live operations explicitly target and validate that vault through Obsidian CLI.
 Do not operate on the user's other vaults. Do not silently replace CLI failures with disk writes.
 `tkflow` is already the vault. Save each actual project directly under

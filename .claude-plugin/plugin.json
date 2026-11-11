@@ -1,0 +1,9 @@
+{
+  "name": "tkflow",
+  "version": "0.2.0",
+  "description": "Obsidian-first blueprints, vertical slices, and fresh-agent continuation",
+  "author": {
+    "name": "Ted Kim"
+  },
+  "repository": "https://github.com/tkkhq/tkflow"
+}
