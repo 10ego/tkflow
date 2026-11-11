@@ -2,8 +2,8 @@
 
 Verified on 2026-11-11 with Obsidian 1.15.0, Excalidraw 2.29.2, and Python 3.13.
 
-- Isolated behavior suite: 13 tests passed. Covers resume preservation, stale-write
-  rejection, vault/path guards, escaping, handoff snapshots, registration, and installation.
+- Isolated behavior suite: 14 tests passed. Covers resume preservation, stale-write
+  rejection, vault/path guards, escaping, handoff snapshots, registration, installation, and direct project placement/navigation.
 - Skill validator: passed using the isolated `.venv` with PyYAML 6.0.3.
 - Official CLI: dedicated vault connected; start/resume and drawing view type verified.
 - Drawing capture: blank and labeled examples exported as scene JSON, SVG, and PNG.
