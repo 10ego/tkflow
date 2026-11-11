@@ -9,6 +9,9 @@ Use the local tool at `~/.local/bin/tkflow`. Run `tkflow --help` for syntax and
 `tkflow doctor` before the first live operation. Default vault: `~/Documents/tkflow`.
 All live operations explicitly target and validate that vault through Obsidian CLI.
 Do not operate on the user's other vaults. Do not silently replace CLI failures with disk writes.
+`tkflow` is already the vault. Save each actual project directly under
+`Projects/<project>/`, never inside an extra tkflow project folder. Toolkit reference
+records belong in `System/` and demonstrations in `Examples/`.
 
 ## Start or resume
 

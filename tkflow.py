@@ -300,7 +300,14 @@ def start(vault, bridge, name):
     home = bridge.read('Home.md')
     link = f'[[Projects/{slug}/Blueprint|{title}]]'
     if f'[[Projects/{slug}/Blueprint|' not in home:
-        bridge.replace('Home.md', home.rstrip() + '\n\n- ' + link + '\n', digest(home))
+        section = re.search(r'^## Projects\s*$', home, flags=re.M)
+        if section:
+            following = re.search(r'^## ', home[section.end():], flags=re.M)
+            position = section.end() + following.start() if following else len(home)
+            updated = home[:position].rstrip() + '\n\n- ' + link + '\n\n' + home[position:]
+        else:
+            updated = home.rstrip() + '\n\n## Projects\n\n- ' + link + '\n'
+        bridge.replace('Home.md', updated, digest(home))
     # Set active only once all project records exist, preserving previous state on failure.
     state = vault / '.tkflow/active.json'
     temp = state.with_suffix('.tmp')

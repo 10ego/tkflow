@@ -71,6 +71,17 @@ class BehaviorTests(unittest.TestCase):
         self.assertEqual(note.read_text(), 'Keep me')
         self.assertFalse((self.vault / '.tkflow').exists())
 
+    def test_new_project_is_direct_child_and_listed_before_references(self):
+        tkflow.init_vault(self.vault)
+        bridge = FakeVault()
+        bridge.docs['Home.md'] = '# tkflow\n\n## Projects\n\n## Reference\n\n- [[System/Blueprint]]\n'
+        tkflow.start(self.vault, bridge, 'Reading room')
+        self.assertIn('Projects/reading-room/Blueprint.md', bridge.docs)
+        self.assertFalse(any(p.startswith('Projects/tkflow/') for p in bridge.docs))
+        home = bridge.docs['Home.md']
+        self.assertLess(home.index('[[Projects/reading-room/Blueprint|'), home.index('## Reference'))
+        self.assertIn('[[System/Blueprint]]', home)
+
     def test_reinitialization_keeps_vault_settings(self):
         tkflow.init_vault(self.vault)
         config = self.vault / '.obsidian/app.json'; config.write_text('{"custom":true}')

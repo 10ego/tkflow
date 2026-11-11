@@ -107,14 +107,22 @@ than bypassing it or silently writing notes on disk.
 
 ## Project record
 
+`tkflow` is the vault itself. Each actual project lives directly under its
+`Projects/` folder; do not add another `tkflow` project layer.
+
 ```text
-Projects/my-idea/
-  Sketch.excalidraw.md
-  Blueprint.md
-  Decisions.md
-  Status.md
-  Evidence/
-  Preview/blueprint.html
+tkflow/                         # Obsidian vault
+  Home.md
+  Projects/
+    my-idea/
+      Sketch.excalidraw.md
+      Blueprint.md
+      Decisions.md
+      Status.md
+      Evidence/
+      Preview/blueprint.html
+  System/                       # toolkit setup and verification records
+  Examples/                     # clearly labeled demonstrations
 ```
 
 Blueprints carry purpose, provenance, why, scope, promises, ranked tiebreakers,
@@ -140,7 +148,7 @@ if your Python environment does not already provide it.
 
 Tests cover the isolated lifecycle, conflict rejection, vault/path boundaries,
 escaping, and frozen handoff behavior. Live app results are recorded separately in
-the tkflow project's Evidence/ folder. The first version uses the agent host's skill
+the vault's System/Evidence/ folder. The first version uses the agent host's skill
 menu; it does not add an Obsidian chat panel, background watcher, or autonomous model
 daemon. The HTML renderer supports the blueprint template's headings, paragraphs,
 bullets, callouts, code, and Obsidian links, rather than all Markdown extensions.

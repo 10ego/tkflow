@@ -19,7 +19,9 @@ Verified on 2026-11-11 with Obsidian 1.15.0, Excalidraw 2.29.2, and Python 3.13.
   identified that the next real project and its acceptance scenarios were not supplied.
 
 Detailed source records and the cold audit are in the dedicated vault under
-`Projects/tkflow/Evidence/`. The example is explicitly agent-authored. No real user
+`System/Evidence/`. Actual projects live directly in `Projects/<project>/`; toolkit
+records are in `System/`, and the agent-authored demonstration is in `Examples/`.
+No real user
 sketch/product acceptance session or new-session slash-menu interaction has been
 verified. Saved-content guarantees do not extend to unsaved editor buffers.
 
