@@ -5,7 +5,7 @@
   "author": {
     "name": "Ted Kim"
   },
-  "repository": "https://github.com/tkkhq/tkflow",
+  "repository": "https://github.com/10ego/tkflow",
   "skills": "./skills/",
   "interface": {
     "displayName": "tkflow",

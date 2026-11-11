@@ -13,7 +13,7 @@ The repository is private; your Git credentials must be able to read it.
 ### Codex
 
 ```sh
-codex plugin marketplace add tkkhq/tkflow
+codex plugin marketplace add 10ego/tkflow
 codex plugin add tkflow@tkflow-plugins
 ```
 
@@ -23,7 +23,7 @@ command menu. The plugin bundles the workflow and all six mode skills.
 ### Claude Code
 
 ```sh
-claude plugin marketplace add tkkhq/tkflow
+claude plugin marketplace add 10ego/tkflow
 claude plugin install tkflow@tkflow-plugins
 ```
 
@@ -33,7 +33,7 @@ Start a new session. Plugin skills use Claude's namespace, for example
 ### OpenCode 2.x
 
 ```sh
-opencode plugin add git+ssh://git@github.com/tkkhq/tkflow.git
+opencode plugin add git+ssh://git@github.com/10ego/tkflow.git
 ```
 
 This uses OpenCode's plugin manager to install and configure the package, preserving
@@ -43,7 +43,7 @@ package pins its OpenCode SDK dependency; it does not change permissions or prov
 ### Pi
 
 ```sh
-pi install git:github.com/tkkhq/tkflow
+pi install git:github.com/10ego/tkflow
 ```
 
 Use `/reload` in an existing session. The package loads a native extension that

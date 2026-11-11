@@ -6,7 +6,7 @@
   "description": "Obsidian-first blueprints, vertical slices, and fresh-agent continuation",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/tkkhq/tkflow.git"
+    "url": "git+ssh://git@github.com/10ego/tkflow.git"
   },
   "engines": {
     "node": ">=22"
