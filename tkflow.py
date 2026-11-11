@@ -194,7 +194,9 @@ def render_html(text, title, vault_name='tkflow'):
                 blocks.append('<ul>'); listing = True
             blocks.append('<li>' + render_inline(line[2:], vault_name) + '</li>')
         elif line.startswith('> '):
-            flush(); blocks.append('<aside>' + render_inline(line[2:], vault_name) + '</aside>')
+            flush()
+            content = re.sub(r'^\[![^\]]+\]\s*(.*)', r'**\1**', line[2:])
+            blocks.append('<aside>' + render_inline(content, vault_name) + '</aside>')
         elif not line.strip():
             flush()
         else:
@@ -350,6 +352,9 @@ or exercise the next behavior. This audit alone is not implementation verificati
 def install():
     targets = [(Path.home() / '.local/bin/tkflow', ROOT / 'tkflow.py'),
                (Path.home() / '.codex/skills/tkflow', ROOT / 'skills/tkflow')]
+    bundled = Path('/Applications/Obsidian.app/Contents/MacOS/obsidian-cli')
+    if not shutil.which('obsidian') and bundled.is_file():
+        targets.append((Path.home() / '.local/bin/obsidian', bundled))
     for link, source in targets:
         link.parent.mkdir(parents=True, exist_ok=True)
         if link.is_symlink() and link.resolve() == source:

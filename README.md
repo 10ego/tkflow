@@ -70,6 +70,10 @@ Requires Python 3.10+, Git, a recent Obsidian installer with its official CLI en
 and Excalidraw. The bundled CLI is used if `obsidian` is absent from PATH. Override
 its location with `TKFLOW_OBSIDIAN_CLI` when necessary.
 
+On macOS, installation also exposes the bundled official CLI at
+`~/.local/bin/obsidian` when no `obsidian` command is already available. Existing
+commands and skill installations are never overwritten.
+
 ```sh
 python3 tkflow.py install
 tkflow init

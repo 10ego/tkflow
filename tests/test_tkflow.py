@@ -165,6 +165,18 @@ class BehaviorTests(unittest.TestCase):
         self.assertIn('vault=Other%20Vault', rendered)
         self.assertIn('Read intent</a>', rendered)
 
+    def test_install_is_idempotent_and_preserves_existing_commands(self):
+        with patch('tkflow.Path.home', return_value=self.vault.parent), patch('tkflow.shutil.which', return_value='/already/obsidian'):
+            tkflow.install()
+            tkflow.install()
+            command = self.vault.parent / '.local/bin/tkflow'
+            self.assertEqual(command.resolve(), tkflow.ROOT / 'tkflow.py')
+            command.unlink()
+            command.write_text('my existing command')
+            with self.assertRaisesRegex(tkflow.FlowError, 'Refusing to replace'):
+                tkflow.install()
+            self.assertEqual(command.read_text(), 'my existing command')
+
 
 if __name__ == '__main__':
     unittest.main()
