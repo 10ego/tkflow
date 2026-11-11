@@ -3,37 +3,108 @@
 Sketch an idea in Obsidian. Refine an intent-rich blueprint. Build one testable
 behavior at a time, with enough recorded rationale for a fresh agent to continue.
 
-## Installed entry points
+## Install
 
-- `/tkflow` in the Codex skill menu, or `$tkflow` in a prompt. Restart the agent
-  session if the newly installed skill has not appeared yet.
-- `tkflow` in your terminal. Run `tkflow --help` for local artifact tools.
-- Dedicated vault: `~/Documents/tkflow`. Code: `~/workspace/tkflow`.
+Requires Python 3.10+ and Git. For the Obsidian workflow, also install Obsidian with
+its official CLI enabled and the Excalidraw plugin in your tkflow vault.
 
-The agent skill performs blueprint reasoning and build coordination. The terminal
-tool manages saved artifacts; it does not call a model or turn a sketch into a
-blueprint by itself. No separate API key is required for the local tool.
+```sh
+gh repo clone tkkhq/tkflow
+cd tkflow
+python3 tkflow.py install --host all
+```
+
+Or install only selected hosts:
+
+```sh
+python3 tkflow.py install --host codex
+python3 tkflow.py install --host claude
+python3 tkflow.py install --host opencode
+python3 tkflow.py install --host pi
+# Multiple selections are supported:
+python3 tkflow.py install --host codex --host claude
+# Preview without writing:
+python3 tkflow.py install --host all --dry-run
+```
+
+The default without `--host` remains Codex. The installer copies the runtime,
+templates, shared skill, and command resources into a content-addressed release under
+`~/.local/share/tkflow/releases/`, then installs host entry points and
+`~/.local/bin/tkflow`. You can move or remove the checkout after installation.
+Existing unrelated commands are never replaced. Conflicts are checked before any
+host entry changes. Re-running the installer updates only tkflow-owned links.
+
+| Host | Entry points | Installation location |
+| --- | --- | --- |
+| Codex | Skills, including explicit `$tkflow-*` invocation | `~/.codex/skills/tkflow*` |
+| Claude Code | Skills exposed as slash commands | `~/.claude/skills/tkflow*` |
+| OpenCode | Prompt commands plus shared skill | `~/.config/opencode/commands/` and `skills/tkflow/` |
+| Pi | Prompt templates plus shared skill | `~/.pi/agent/prompts/` and `skills/tkflow/` |
+
+`CODEX_HOME`, `CLAUDE_CONFIG_DIR`, `XDG_CONFIG_HOME`, and `PI_CODING_AGENT_DIR` are
+respected. `--home /temporary/root` creates an isolated installation and ignores those
+overrides; it is useful for testing. No host permission settings or credentials change.
+Ensure `~/.local/bin` is on PATH to use `tkflow` from the terminal.
+
+Start a new agent session after installation. In Pi, `/reload` also refreshes prompts.
+The model uses your host's existing provider setup; tkflow does not need another API key.
+
+## Commands
+
+```text
+/tkflow                    start or resume
+/tkflow-start My idea       open a project sketch
+/tkflow-blueprint           interpret the saved sketch and draft the blueprint
+/tkflow-refine              refine the blueprint and decisions
+/tkflow-build               build the next ready vertical slice
+/tkflow-status              brief progress in observable behavior
+/tkflow-verify              audit continuation with a fresh agent
+```
+
+`/tkflow blueprint`, `/tkflow refine`, and the other mode arguments remain supported.
+These are agent commands, not terminal subcommands. The shared skill performs model
+reasoning and build coordination; the terminal tool manages the saved artifacts.
+Fresh-agent verification uses each host's available isolation mechanism. If a host
+cannot launch a fresh context, tkflow provides the packet for a new session and marks
+the audit pending instead of claiming that it ran.
+
+## Native Pi package (alternative)
+
+Pi can install this repository directly as a package:
+
+```sh
+pi install git:github.com/tkkhq/tkflow
+```
+
+Git must have access to the repository (it is initially private). Choose this route or
+`install --host pi`, rather than registering the same commands twice. The package
+manifest exposes the shared skill and all seven prompt templates. The skill includes
+`scripts/run.py` to run its bundled helper when `tkflow` is not on PATH, so native Pi
+installation does not require a second executable installation.
 
 ## First use
+
+Your dedicated vault defaults to `~/Documents/tkflow`. Complete the one-time vault
+setup below if needed, then:
 
 ```sh
 tkflow doctor
 tkflow start "My idea"
 ```
 
-Draw in the opened Excalidraw note. Then ask your agent:
+Draw and save in Obsidian, then invoke `/tkflow-blueprint` in your agent. Refine until
+the first slice is ready, then `/tkflow-build`.
 
-```text
-/tkflow blueprint
-/tkflow refine
-/tkflow build
-/tkflow status
-/tkflow verify
+## Update
+
+```sh
+cd /path/to/tkflow
+git pull --ff-only
+python3 tkflow.py install --host all
 ```
 
-These are modes of the agent skill, not terminal subcommands. The skill reads the
-current project record, captures the saved sketch, and reasons about its meaning.
-Markdown remains authoritative; the optional HTML view is regenerated.
+For a native Pi package, use `pi update`. Installation never changes project notes;
+the vault is separate from both this repository and the installed runtime.
 
 ## Local artifact tools
 
@@ -75,7 +146,7 @@ On macOS, installation also exposes the bundled official CLI at
 commands and skill installations are never overwritten.
 
 ```sh
-python3 tkflow.py install
+python3 tkflow.py install --host all
 tkflow init
 tkflow register
 ```
@@ -156,4 +227,9 @@ bullets, callouts, code, and Obsidian links, rather than all Markdown extensions
 Sources: [Obsidian CLI](https://obsidian.md/help/cli),
 [safe note updates](https://docs.obsidian.md/Plugins/Vault),
 [Excalidraw automation API](https://github.com/zsviczian/obsidian-excalidraw-plugin/blob/master/docs/API/ExcalidrawAutomate.d.ts),
-[Codex skill invocation](https://learn.chatgpt.com/docs/reference/slash-commands).
+[Codex skill invocation](https://learn.chatgpt.com/docs/reference/slash-commands),
+[Claude skills](https://code.claude.com/docs/en/skills),
+[OpenCode commands](https://opencode.ai/docs/commands/),
+[OpenCode skills](https://opencode.ai/docs/skills/),
+[Pi packages](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/packages.md),
+and [Pi prompt templates](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/prompt-templates.md).
