@@ -1,0 +1,4 @@
+interface:
+  display_name: "tkflow"
+  short_description: "Sketch intent, refine blueprints, build and verify"
+  default_prompt: "Use $tkflow to start or resume my Obsidian project."
