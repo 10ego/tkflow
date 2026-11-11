@@ -1,235 +1,179 @@
 # tkflow
 
-Sketch an idea in Obsidian. Refine an intent-rich blueprint. Build one testable
-behavior at a time, with enough recorded rationale for a fresh agent to continue.
+An Obsidian-first workflow plugin for Codex, Claude Code, OpenCode, and Pi.
+Sketch an idea, refine a blueprint that records why, then build and verify one
+observable behavior at a time.
 
-## Install
+## Install as a plugin
 
-Requires Python 3.10+ and Git. For the Obsidian workflow, also install Obsidian with
-its official CLI enabled and the Excalidraw plugin in your tkflow vault.
+Requires Node.js 22+ and Git. The workflow uses your agent host's existing model
+setup. There is no Python installer, Python runtime, or separate helper installation.
+The repository is private; your Git credentials must be able to read it.
 
-```sh
-gh repo clone tkkhq/tkflow
-cd tkflow
-python3 tkflow.py install --host all
-```
-
-Or install only selected hosts:
+### Codex
 
 ```sh
-python3 tkflow.py install --host codex
-python3 tkflow.py install --host claude
-python3 tkflow.py install --host opencode
-python3 tkflow.py install --host pi
-# Multiple selections are supported:
-python3 tkflow.py install --host codex --host claude
-# Preview without writing:
-python3 tkflow.py install --host all --dry-run
+codex plugin marketplace add tkkhq/tkflow
+codex plugin add tkflow@tkflow-plugins
 ```
 
-The default without `--host` remains Codex. The installer copies the runtime,
-templates, shared skill, and command resources into a content-addressed release under
-`~/.local/share/tkflow/releases/`, then installs host entry points and
-`~/.local/bin/tkflow`. You can move or remove the checkout after installation.
-Existing unrelated commands are never replaced. Conflicts are checked before any
-host entry changes. Re-running the installer updates only tkflow-owned links.
+Start a new session and invoke `$tkflow` or select the tkflow plugin/skills from the
+command menu. The plugin bundles the workflow and all six mode skills.
 
-| Host | Entry points | Installation location |
-| --- | --- | --- |
-| Codex | Skills, including explicit `$tkflow-*` invocation | `~/.codex/skills/tkflow*` |
-| Claude Code | Skills exposed as slash commands | `~/.claude/skills/tkflow*` |
-| OpenCode | Prompt commands plus shared skill | `~/.config/opencode/commands/` and `skills/tkflow/` |
-| Pi | Prompt templates plus shared skill | `~/.pi/agent/prompts/` and `skills/tkflow/` |
+### Claude Code
 
-`CODEX_HOME`, `CLAUDE_CONFIG_DIR`, `XDG_CONFIG_HOME`, and `PI_CODING_AGENT_DIR` are
-respected. `--home /temporary/root` creates an isolated installation and ignores those
-overrides; it is useful for testing. No host permission settings or credentials change.
-Ensure `~/.local/bin` is on PATH to use `tkflow` from the terminal.
-
-Start a new agent session after installation. In Pi, `/reload` also refreshes prompts.
-The model uses your host's existing provider setup; tkflow does not need another API key.
-
-## Commands
-
-```text
-/tkflow                    start or resume
-/tkflow-start My idea       open a project sketch
-/tkflow-blueprint           interpret the saved sketch and draft the blueprint
-/tkflow-refine              refine the blueprint and decisions
-/tkflow-build               build the next ready vertical slice
-/tkflow-status              brief progress in observable behavior
-/tkflow-verify              audit continuation with a fresh agent
+```sh
+claude plugin marketplace add tkkhq/tkflow
+claude plugin install tkflow@tkflow-plugins
 ```
 
-`/tkflow blueprint`, `/tkflow refine`, and the other mode arguments remain supported.
-These are agent commands, not terminal subcommands. The shared skill performs model
-reasoning and build coordination; the terminal tool manages the saved artifacts.
-Fresh-agent verification uses each host's available isolation mechanism. If a host
-cannot launch a fresh context, tkflow provides the packet for a new session and marks
-the audit pending instead of claiming that it ran.
+Start a new session. Plugin skills use Claude's namespace, for example
+`/tkflow:tkflow`, `/tkflow:tkflow-blueprint`, and `/tkflow:tkflow-build`.
 
-## Native Pi package (alternative)
+### OpenCode 2.x
 
-Pi can install this repository directly as a package:
+```sh
+opencode plugin add git+ssh://git@github.com/tkkhq/tkflow.git
+```
+
+This uses OpenCode's plugin manager to install and configure the package, preserving
+other plugins. Its native server adapter registers the seven commands below. The
+package pins its OpenCode SDK dependency; it does not change permissions or providers.
+
+### Pi
 
 ```sh
 pi install git:github.com/tkkhq/tkflow
 ```
 
-Git must have access to the repository (it is initially private). Choose this route or
-`install --host pi`, rather than registering the same commands twice. The package
-manifest exposes the shared skill and all seven prompt templates. The skill includes
-`scripts/run.py` to run its bundled helper when `tkflow` is not on PATH, so native Pi
-installation does not require a second executable installation.
+Use `/reload` in an existing session. The package loads a native extension that
+registers the seven commands, plus the shared workflow skill.
 
-## First use
+## Commands
 
-Your dedicated vault defaults to `~/Documents/tkflow`. Complete the one-time vault
-setup below if needed, then:
+| Command | Behavior |
+| --- | --- |
+| `/tkflow` | Start or resume the active project |
+| `/tkflow-start My idea` | Open a new or existing project sketch |
+| `/tkflow-blueprint` | Inspect the saved drawing and draft an intent-rich blueprint |
+| `/tkflow-refine` | Refine the blueprint and decision log |
+| `/tkflow-build` | Build the next ready vertical slice |
+| `/tkflow-status` | Brief Works / Try / Left / Deviations / Provisional |
+| `/tkflow-verify` | Audit continuation with a fresh agent |
 
-```sh
-tkflow doctor
-tkflow start "My idea"
-```
+Claude prefixes these skill names with `tkflow:`; Codex also accepts explicit
+`$tkflow-*` skill invocation. `/tkflow blueprint` and other mode arguments remain
+supported by the shared workflow.
 
-Draw and save in Obsidian, then invoke `/tkflow-blueprint` in your agent. Refine until
-the first slice is ready, then `/tkflow-build`.
+## Obsidian setup
 
-## Update
+Install a recent Obsidian desktop app and enable its official CLI. Excalidraw must
+be installed and enabled in the dedicated vault. The default vault is
+`~/Documents/tkflow`; override it with `TKFLOW_VAULT` or the helper's `--vault` option.
 
-```sh
-cd /path/to/tkflow
-git pull --ff-only
-python3 tkflow.py install --host all
-```
+Ask the plugin to check setup. It runs its bundled helper through
+`node <plugin-root>/skills/tkflow/scripts/run.mjs doctor`.
 
-For a native Pi package, use `pi update`. Installation never changes project notes;
-the vault is separate from both this repository and the installed runtime.
+For a new vault, the helper supports `init`, `register`, and `setup-plugin`.
+`init` refuses an unrelated nonempty folder. On macOS, `register` adds only the new
+vault entry to Obsidian's local registry and backs up the original configuration.
+It does not restart Obsidian. `setup-plugin` checks that community plugins have
+already been enabled with explicit approval before installing Excalidraw.
 
-## Local artifact tools
-
-```sh
-tkflow start                       # resume active sketch, or create a new idea
-tkflow read --note Blueprint       # content plus SHA-256 revision token
-tkflow read --note Decisions
-tkflow read --note Status
-tkflow open --note Blueprint --split
-tkflow capture                     # saved scene JSON and PNG/SVG visuals in Evidence/
-tkflow preview --open              # generated HTML reading view
-tkflow handoff                     # frozen three-note packet for a fresh agent
-tkflow checkpoint --message 'docs(project): record milestone evidence'
-```
-
-To update a note, write the proposed text to a temporary file, then:
-
-```sh
-tkflow write --note Blueprint --from /absolute/proposal.md --expect SHA256_FROM_READ
-```
-
-A stale revision is rejected. Reread and reconcile the user's changes before
-retrying. Writes use Obsidian's `Vault.process()` for the final content comparison.
-Protection applies to saved content; allow Obsidian to save current editor/drawing
-changes before capture or refinement. The tool never edits the original sketch.
-
-`--project name` selects a project explicitly. `--vault /absolute/vault` or
-`TKFLOW_VAULT` selects another initialized tkflow vault. Every live request validates
-the actual vault path, even if another vault has the same name.
-
-## Setup on another Mac
-
-Requires Python 3.10+, Git, a recent Obsidian installer with its official CLI enabled,
-and Excalidraw. The bundled CLI is used if `obsidian` is absent from PATH. Override
-its location with `TKFLOW_OBSIDIAN_CLI` when necessary.
-
-On macOS, installation also exposes the bundled official CLI at
-`~/.local/bin/obsidian` when no `obsidian` command is already available. Existing
-commands and skill installations are never overwritten.
-
-```sh
-python3 tkflow.py install --host all
-tkflow init
-tkflow register
-```
-
-The official CLI does not expose vault creation/registration. `init` bootstraps a
-new local vault, and `register` adds only its entry to macOS Obsidian configuration,
-preserving existing entries and creating a backup. It never restarts Obsidian.
-If the app was already running, save your work and restart it to load registration.
-Then open the registered vault from the terminal:
-
-```sh
-open 'obsidian://open?vault=tkflow&file=Home'
-tkflow doctor
-```
-
-Community plugins must be enabled for this dedicated vault before Excalidraw can
-run. tkflow reports that condition and does not change restricted mode automatically.
-After explicitly approving that setting change, use the official CLI:
-
-```sh
-obsidian vault=tkflow plugins:restrict off
-tkflow setup-plugin
-```
-
-If `obsidian` is not on PATH, its macOS binary is
-`/Applications/Obsidian.app/Contents/MacOS/obsidian-cli`. App communication may require
-running outside an agent's shell sandbox; use the normal approval mechanism rather
-than bypassing it or silently writing notes on disk.
+Each live request validates the actual vault path and uses the official Obsidian CLI.
+CLI failures are reported; they never trigger a silent fallback to disk note writes.
+Derived captures, previews, and temporary handoff packets are local artifacts.
 
 ## Project record
 
-`tkflow` is the vault itself. Each actual project lives directly under its
-`Projects/` folder; do not add another `tkflow` project layer.
+`tkflow` is the vault itself. Actual projects live directly under `Projects/`:
 
 ```text
-tkflow/                         # Obsidian vault
+tkflow/
   Home.md
-  Projects/
-    my-idea/
-      Sketch.excalidraw.md
-      Blueprint.md
-      Decisions.md
-      Status.md
-      Evidence/
-      Preview/blueprint.html
-  System/                       # toolkit setup and verification records
-  Examples/                     # clearly labeled demonstrations
+  Projects/my-idea/
+    Sketch.excalidraw.md
+    Blueprint.md
+    Decisions.md
+    Status.md
+    Evidence/
+    Preview/blueprint.html
+  System/                 # toolkit reference and verification records
+  Examples/               # clearly labeled demonstrations
 ```
 
-Blueprints carry purpose, provenance, why, scope, promises, ranked tiebreakers,
-behavior IDs, acceptance scenarios, vertical slices, and unknowns. Decisions retain
-provisional choices and superseded rationale. Status gives a short current briefing
-and the repository/environment instructions a fresh agent needs.
+The blueprint records purpose, provenance, why, scope, promises, ranked tiebreakers,
+behavior IDs, acceptance examples, vertical slices, and unknowns. Markdown is
+canonical; HTML is a generated reading view.
 
-At every milestone, verify the real acceptance behavior, show the user how to try
-it, record deviations and provisional decisions, checkpoint the work, and run a fresh
-agent audit. A handoff packet contains only the three notes, generic audit prompt,
-and revision hashes. Creating a packet is not an audit. A docs-only audit is not
-implementation verification.
+Before asking you a question, the agent searches the spec and log, then applies
+intent and tiebreakers to supported reversible choices and logs them provisionally.
+It asks about costly new product commitments or unresolved material contradictions,
+using observable behavior rather than code details. Silence does not approve an
+irreversible action.
 
-## Verification and limits
+Each milestone ends in a behavior you can try, acceptance evidence, a short briefing,
+and a checkpoint commit. A fresh-agent audit initially uses only Blueprint,
+Decisions, and Status. Missing context is repaired in the notes. If the host cannot
+launch an independent context, the plugin provides a packet and reports the audit
+pending. Packet generation alone is not verification.
+
+## Bundled helper
+
+The host resolves the helper from the installed plugin, so it works from the native
+plugin cache without a checkout or a global command. For local development:
 
 ```sh
-python3 -m unittest discover -s tests -v
-python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/tkflow
+node skills/tkflow/scripts/run.mjs --help
+node skills/tkflow/scripts/run.mjs doctor
+node skills/tkflow/scripts/run.mjs start "My idea"
+node skills/tkflow/scripts/run.mjs capture
+node skills/tkflow/scripts/run.mjs preview --open
+node skills/tkflow/scripts/run.mjs handoff
 ```
 
-The skill validator requires PyYAML; install it into an isolated virtual environment
-if your Python environment does not already provide it.
+Reading a note returns a SHA-256 revision token. A write requires that token:
 
-Tests cover the isolated lifecycle, conflict rejection, vault/path boundaries,
-escaping, and frozen handoff behavior. Live app results are recorded separately in
-the vault's System/Evidence/ folder. The first version uses the agent host's skill
-menu; it does not add an Obsidian chat panel, background watcher, or autonomous model
-daemon. The HTML renderer supports the blueprint template's headings, paragraphs,
-bullets, callouts, code, and Obsidian links, rather than all Markdown extensions.
+```sh
+node skills/tkflow/scripts/run.mjs read --note Blueprint
+node skills/tkflow/scripts/run.mjs write --note Blueprint --from /absolute/proposal.md --expect TOKEN
+```
 
-Sources: [Obsidian CLI](https://obsidian.md/help/cli),
-[safe note updates](https://docs.obsidian.md/Plugins/Vault),
-[Excalidraw automation API](https://github.com/zsviczian/obsidian-excalidraw-plugin/blob/master/docs/API/ExcalidrawAutomate.d.ts),
-[Codex skill invocation](https://learn.chatgpt.com/docs/reference/slash-commands),
-[Claude skills](https://code.claude.com/docs/en/skills),
-[OpenCode commands](https://opencode.ai/docs/commands/),
-[OpenCode skills](https://opencode.ai/docs/skills/),
+Stale writes are rejected, including changes between the initial read and the final
+`Vault.process()` callback. Reread and merge before retrying. Protection applies to
+saved content; save editor and drawing changes before refinement or capture.
+
+## Development
+
+```sh
+npm ci --ignore-scripts
+npm test
+claude plugin validate .
+```
+
+The shared runtime uses only Node built-ins. Only the OpenCode adapter imports its
+pinned SDK. Tests exercise project lifecycle, saved-edit conflicts, path boundaries,
+source-independent plugin execution, handoff snapshots, adapter registration, and
+argument/attachment forwarding. See [verification](docs/verification.md) for native
+host proof and explicit limits.
+
+Host plugin managers own installation, updates, and removal. Updating the plugin
+never updates or deletes vault notes. This package is not published to npm or a
+public plugin directory; native installation uses the private Git repository.
+
+## Migration from the initial Python version
+
+Install the native plugin first. Old manually installed `tkflow*` skills and prompt
+files can shadow the plugin or cause duplicates. Remove only links recorded in
+`~/.local/share/tkflow/install.json` that still point at its recorded tkflow release;
+leave unrelated commands, modified files, and the vault intact. The old runtime
+snapshots can remain as inactive rollback copies. New plugin commands use the
+bundled Node helper, not the old `~/.local/bin/tkflow` link.
+
+Sources: [Codex packaging](https://developers.openai.com/plugins/build/plugins),
+[Claude plugin reference](https://code.claude.com/docs/en/plugins-reference),
+[OpenCode plugins](https://opencode.ai/docs/plugins/),
+[OpenCode server commands](https://opencode.ai/docs/build/plugins/server/),
 [Pi packages](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/packages.md),
-and [Pi prompt templates](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/prompt-templates.md).
+[Obsidian CLI](https://obsidian.md/help/cli), and
+[safe note updates](https://docs.obsidian.md/Plugins/Vault).
