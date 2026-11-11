@@ -91,3 +91,16 @@ Limits: Codex/Claude installation layout and skill format are verified, but thei
 interactive command menus and model-driven execution have not been exercised in new
 sessions. Pi/OpenCode command discovery is not an end-to-end model execution test.
 The native Pi manifest is checked; a remote `pi install` clone has not been tested.
+
+### Claude marketplace source migration
+
+After repository ownership moved from `tkkhq/tkflow` to `10ego/tkflow`, Claude's
+existing `tkflow-plugins` user declaration and cached marketplace registration
+still pointed to the old owner. Native `marketplace add 10ego/tkflow` therefore
+failed with an `extraKnownMarketplaces` source mismatch.
+
+The repair backed up and changed only those tkflow source entries, refreshed the
+clean marketplace clone through Claude's native updater, and preserved the installed
+plugin. The refreshed cache uses the verified `10egogh` SSH identity for its private
+repository. Native add, update, and install then succeeded; tkflow remained enabled
+at 0.2.0 and unrelated Claude settings were unchanged.
