@@ -1,4 +1,41 @@
-# Initial local verification
+# Native plugin verification — 0.2.0
+
+Verified on 2026-11-11. This release replaces the standalone Python installer and
+runtime with native host plugins and a bundled Node.js helper.
+
+- `npm test`: 25 behavior and adapter tests pass. These cover saved-edit conflicts,
+  including a racing save at the final callback, path and symlink boundaries,
+  project layout/resume, registration, handoff snapshots, relocated plugin execution,
+  and command argument/attachment delivery.
+- All seven skill files pass the skill validator. Claude's native manifest validator
+  passes with optional marketplace/public-directory listing warnings. This private
+  package has not been submitted to a public directory.
+- Native Codex and Claude marketplace installation succeeds, first in isolated
+  profiles, then from the private Git repository in the live user profiles. Both
+  report tkflow@tkflow-plugins version 0.2.0 installed and enabled.
+- The Node helper inside Codex's actual plugin cache connects to the exact tkflow
+  vault. A live capture exports scene, PNG, and SVG without editing the original
+  drawing. A live stale-write probe rejects the proposal and preserves the saved edit.
+- Pi's native Git package install succeeds. Its RPC registry identifies all seven
+  commands as extension commands; legacy prompt links have been removed.
+- OpenCode's native Git package install succeeds and plugin.list identifies tkflow
+  as an active package plugin. A fresh authenticated local server confirms all seven
+  native command descriptions after removing legacy command links. The isolated
+  fixture initially hit a port conflict and configuration-loading issues; those
+  incomplete results were not counted as plugin proof.
+- 31 unchanged, manifest-owned legacy links were retired after native installation.
+  Modified/unrelated files and the vault were preserved. Old runtime snapshots are
+  inactive rollback copies.
+- `npm pack --dry-run` includes the native manifests and Node runner and contains
+  zero Python files. No npm publication or public marketplace submission occurred.
+
+Limits: installation and discovery are verified; model-driven execution of every
+command in every host and the user's own sketch-to-build trial remain unverified.
+Saved-content protection does not cover unsaved editor buffers.
+
+## Historical verification before native plugin migration
+
+### Initial local verification
 
 Verified on 2026-11-11 with Obsidian 1.15.0, Excalidraw 2.29.2, and Python 3.13.
 
