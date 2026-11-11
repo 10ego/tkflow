@@ -178,10 +178,10 @@ class BehaviorTests(unittest.TestCase):
 
     def test_install_is_idempotent_and_preserves_existing_commands(self):
         with patch('tkflow.Path.home', return_value=self.vault.parent), patch('tkflow.shutil.which', return_value='/already/obsidian'):
-            tkflow.install()
+            release = tkflow.install()
             tkflow.install()
             command = self.vault.parent / '.local/bin/tkflow'
-            self.assertEqual(command.resolve(), tkflow.ROOT / 'tkflow.py')
+            self.assertEqual(command.resolve(), release / 'tkflow.py')
             command.unlink()
             command.write_text('my existing command')
             with self.assertRaisesRegex(tkflow.FlowError, 'Refusing to replace'):

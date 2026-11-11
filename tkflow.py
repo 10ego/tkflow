@@ -356,28 +356,26 @@ or exercise the next behavior. This audit alone is not implementation verificati
     return packet
 
 
-def install():
-    targets = [(Path.home() / '.local/bin/tkflow', ROOT / 'tkflow.py'),
-               (Path.home() / '.codex/skills/tkflow', ROOT / 'skills/tkflow')]
-    bundled = Path('/Applications/Obsidian.app/Contents/MacOS/obsidian-cli')
-    if not shutil.which('obsidian') and bundled.is_file():
-        targets.append((Path.home() / '.local/bin/obsidian', bundled))
-    for link, source in targets:
-        link.parent.mkdir(parents=True, exist_ok=True)
-        if link.is_symlink() and link.resolve() == source:
-            continue
-        if link.exists() or link.is_symlink():
-            raise FlowError(f'Refusing to replace existing installation: {link}')
-        link.symlink_to(source, target_is_directory=source.is_dir())
-        print(f'Installed {link}')
+def install(hosts=None, home=None, dry_run=False):
+    from tkflow_install import install as install_package
+    # --home is an isolated installation root, not a change to the process HOME.
+    environment = {} if home is not None else None
+    try:
+        return install_package(ROOT, hosts, home, dry_run, environment)
+    except ValueError as error:
+        raise FlowError(str(error)) from error
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--vault', type=Path, default=Path(os.environ.get('TKFLOW_VAULT', DEFAULT_VAULT)))
     sub = parser.add_subparsers(dest='command', required=True)
-    for name in ('init', 'register', 'doctor', 'install', 'setup-plugin'):
+    for name in ('init', 'register', 'doctor', 'setup-plugin'):
         sub.add_parser(name)
+    p = sub.add_parser('install')
+    p.add_argument('--host', action='append', choices=('codex', 'claude', 'opencode', 'pi', 'all'))
+    p.add_argument('--home', type=Path, help='isolated installation root (ignores host config overrides)')
+    p.add_argument('--dry-run', action='store_true')
     p = sub.add_parser('start'); p.add_argument('name', nargs='?')
     for name in ('read', 'write', 'open', 'capture', 'preview', 'handoff', 'checkpoint'):
         p = sub.add_parser(name); p.add_argument('--project')
@@ -396,7 +394,7 @@ def main(argv=None):
     vault = args.vault.expanduser().resolve()
     bridge = Obsidian(vault)
     if args.command == 'install':
-        install(); return
+        install(args.host, args.home, args.dry_run); return
     if args.command == 'init':
         init_vault(vault); return
     if args.command == 'register':

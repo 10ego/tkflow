@@ -5,7 +5,10 @@ description: Sketch, refine intent-rich blueprints, build vertical slices, and v
 # tkflow
 
 The durable project record must let a fresh agent continue without this conversation.
-Use the local tool at `~/.local/bin/tkflow`. Run `tkflow --help` for syntax and
+Use the local tool at `~/.local/bin/tkflow`. When loaded from a native Pi package or
+another checkout without that installation, use `python3 <this-skill-directory>/scripts/run.py`
+as the runner for the same commands. Resolve the skill directory from the host's
+advertised location; do not assume another user's checkout path. Run `tkflow --help` for syntax and
 `tkflow doctor` before the first live operation. Default vault: `~/Documents/tkflow`.
 All live operations explicitly target and validate that vault through Obsidian CLI.
 Do not operate on the user's other vaults. Do not silently replace CLI failures with disk writes.
@@ -21,6 +24,13 @@ records belong in `System/` and demonstrations in `Examples/`.
   opens the drawing. Resume reads the three notes before deciding the next action.
 - Do not invent a blueprint from an empty sketch. Let the user draw. Use their
   conversation text as additional stated input when available.
+
+The command set also exposes `/tkflow-start`, `/tkflow-blueprint`, `/tkflow-refine`,
+`/tkflow-build`, `/tkflow-status`, and `/tkflow-verify`. These select the corresponding
+workflow below. Codex can explicitly invoke the same skills with `$tkflow-*`.
+OpenCode and Pi use prompt commands to load this shared skill; Claude and Codex use
+skills. Never assume that another host supports fresh subagents: if it cannot launch
+an independent context, prepare the packet for a new session and report the audit pending.
 
 ## Blueprint and refine
 

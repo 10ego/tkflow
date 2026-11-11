@@ -1,0 +1,17 @@
+{
+  "name": "tkflow",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Obsidian-first agent workflow commands for Codex, Claude Code, OpenCode, and Pi",
+  "keywords": [
+    "pi-package"
+  ],
+  "pi": {
+    "skills": [
+      "./skills/tkflow"
+    ],
+    "prompts": [
+      "./commands/*.md"
+    ]
+  }
+}
