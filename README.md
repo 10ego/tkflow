@@ -43,7 +43,7 @@ tkflow read --note Blueprint       # content plus SHA-256 revision token
 tkflow read --note Decisions
 tkflow read --note Status
 tkflow open --note Blueprint --split
-tkflow capture                     # saved scene JSON and visual SVG in Evidence/
+tkflow capture                     # saved scene JSON and PNG/SVG visuals in Evidence/
 tkflow preview --open              # generated HTML reading view
 tkflow handoff                     # frozen three-note packet for a fresh agent
 tkflow checkpoint --message 'docs(project): record milestone evidence'
@@ -130,6 +130,9 @@ implementation verification.
 python3 -m unittest discover -s tests -v
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/tkflow
 ```
+
+The skill validator requires PyYAML; install it into an isolated virtual environment
+if your Python environment does not already provide it.
 
 Tests cover the isolated lifecycle, conflict rejection, vault/path boundaries,
 escaping, and frozen handoff behavior. Live app results are recorded separately in

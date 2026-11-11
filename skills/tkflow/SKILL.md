@@ -22,10 +22,10 @@ Do not operate on the user's other vaults. Do not silently replace CLI failures 
 ## Blueprint and refine
 
 Read [blueprint guidance](references/blueprint.md). Run `tkflow capture` to get
-saved scene elements and an SVG visual. Inspect both; never treat text extraction
+saved scene elements and PNG/SVG visuals. Inspect both; never treat text extraction
 as understanding the drawing. Save source element IDs for claims made from it.
-If the host cannot view SVG, render it locally to an image or inspect it in Obsidian;
-do not claim visual review based only on the scene JSON.
+Inspect the exported PNG with the host's image viewer; do not claim visual review
+based only on the scene JSON. Captures include the source path and revision hash.
 
 Read notes with `tkflow read --note Blueprint` (also Decisions and Status).
 The output includes the SHA-256 revision token. Write proposed content to a temporary

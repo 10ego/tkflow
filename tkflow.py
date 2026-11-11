@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Local Obsidian-first project tools. Reasoning stays in the tkflow agent skill."""
 import argparse
+import base64
 import datetime as dt
 import hashlib
 import html
@@ -126,9 +127,8 @@ await app.workspace.getLeaf({json.dumps('split' if split else 'tab')}).openFile(
         return self.evaluate(f'''const path={json.dumps(path)};
 if(app.vault.getFileByPath(path))return path;
 if(typeof ExcalidrawAutomate==="undefined")throw Error("Enable Excalidraw in the tkflow vault first");
-const ea=ExcalidrawAutomate;
-const slash=path.lastIndexOf('/');
-const created=await ea.create({{exactPath:path,silent:true}});
+const ea=new ExcalidrawAutomate.constructor(app.plugins.getPlugin("obsidian-excalidraw-plugin"));
+let created;try{{created=await ea.create({{exactPath:path,silent:true}});}}finally{{ea.destroy();}}
 if(created!==path) throw Error("Excalidraw created unexpected path: "+created);
 return created;''')
 
@@ -136,10 +136,18 @@ return created;''')
         return self.evaluate(f'''const file=app.vault.getFileByPath({json.dumps(path)});
 if(!file)throw Error("Sketch not found");
 if(typeof ExcalidrawAutomate==="undefined")throw Error("Excalidraw automation unavailable");
-const scene=await ExcalidrawAutomate.getSceneFromFile(file);
-const svg=await ExcalidrawAutomate.createSVG(file.path);
+const ea=new ExcalidrawAutomate.constructor(app.plugins.getPlugin("obsidian-excalidraw-plugin"));
+try{{
+const original=await app.vault.read(file);
+const scene=await ea.getSceneFromFile(file);
+const svg=await ea.createSVG(file.path);
 if(!svg)throw Error("Sketch SVG export failed");
-return {{scene,svg:new XMLSerializer().serializeToString(svg)}};''')
+const png=await ea.createPNGBase64(file.path,1);
+if(await app.vault.read(file)!==original)throw Error("Sketch changed during capture; save edits and retry");
+const hash=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(original));
+const sha256=Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
+return {{scene,svg:new XMLSerializer().serializeToString(svg),png,source:{{path:file.path,sha256,capturedAt:new Date().toISOString()}}}};
+}}finally{{ea.destroy();}}''')
 
 
 def render_inline(text, vault_name='tkflow'):
@@ -220,7 +228,7 @@ def init_vault(vault):
         '.obsidian/appearance.json': json.dumps({'enabledCssSnippets': ['tkflow']}, indent=2),
         '.obsidian/snippets/tkflow.css': (ROOT / 'templates/tkflow.css').read_text(),
         '.gitignore': '.obsidian/workspace*.json\n.obsidian/cache\n.obsidian/plugins/*/main.js\n.obsidian/plugins/*/styles.css\n.tkflow/\n.DS_Store\n',
-        'Home.md': '# tkflow\n\nSketch → blueprint → refine → build → verify.\n\nUse `/tkflow` in your agent to start or resume.\n\nYour blueprint records why, your decisions preserve tradeoffs, and each milestone ends in something you can try.\n\nProject notes live in [[Projects]].\n',
+        'Home.md': '# tkflow\n\nSketch → blueprint → refine → build → verify.\n\nUse `/tkflow` in your agent to start or resume.\n\nYour blueprint records why, your decisions preserve tradeoffs, and each milestone ends in something you can try.\n\n## Projects\n',
     }
     for name, content in files.items():
         p = safe_path(vault, name)
@@ -286,6 +294,11 @@ def start(vault, bridge, name):
         content = template.replace('{{title}}', title).replace('{{slug}}', slug)
         bridge.create(project_path(slug, note), content)
     bridge.create_sketch(project_path(slug, 'Sketch.excalidraw'))
+    bridge.create('Home.md', '# tkflow\n\n## Projects\n')
+    home = bridge.read('Home.md')
+    link = f'[[Projects/{slug}/Blueprint|{title}]]'
+    if f'[[Projects/{slug}/Blueprint|' not in home:
+        bridge.replace('Home.md', home.rstrip() + '\n\n- ' + link + '\n', digest(home))
     # Set active only once all project records exist, preserving previous state on failure.
     state = vault / '.tkflow/active.json'
     temp = state.with_suffix('.tmp')
@@ -297,7 +310,8 @@ def start(vault, bridge, name):
 def save_artifact(vault, relative, data):
     path = safe_path(vault, relative)
     path.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', dir=path.parent, delete=False) as f:
+    options = {'mode': 'wb'} if isinstance(data, bytes) else {'mode': 'w', 'encoding': 'utf-8'}
+    with tempfile.NamedTemporaryFile(dir=path.parent, delete=False, **options) as f:
         f.write(data); temp = Path(f.name)
     temp.replace(path)
     return path
@@ -382,7 +396,8 @@ def main(argv=None):
         info = bridge.doctor()
         if not info['communityPluginsEnabled']:
             raise FlowError('Community plugins are disabled in this vault. Explicitly approve enabling them before setup; tkflow will not change restricted mode automatically.')
-        print(bridge.run('plugin:install', 'id=obsidian-excalidraw-plugin', 'enable'))
+        if not info['excalidraw']:
+            print(bridge.run('plugin:install', 'id=obsidian-excalidraw-plugin', 'enable'))
         for _ in range(10):
             info = bridge.doctor()
             if info['automation']:
@@ -411,11 +426,13 @@ def main(argv=None):
         stamp = dt.datetime.now().strftime('%Y%m%d-%H%M%S') + '-' + uuid.uuid4().hex[:6]
         base = f'Projects/{project}/Evidence/sketch-{stamp}'
         scene = result['scene']
+        scene['tkflowSource'] = result['source']
         elements = [e for e in scene['elements'] if not e.get('isDeleted')]
         result['scene']['elements'] = elements
         json_path = save_artifact(vault, base + '.json', json.dumps(scene, ensure_ascii=False, indent=2))
         svg_path = save_artifact(vault, base + '.svg', result['svg'])
-        print(json.dumps({'scene': str(json_path), 'visual': str(svg_path), 'elements': len(elements),
+        png_path = save_artifact(vault, base + '.png', base64.b64decode(result['png'].split(',')[-1], validate=True))
+        print(json.dumps({'scene': str(json_path), 'visual': str(png_path), 'svg': str(svg_path), 'elements': len(elements),
                           'texts': [{'id': e['id'], 'text': e.get('text', ''), 'x': e.get('x'), 'y': e.get('y')} for e in elements if e.get('type') == 'text'],
                           'note': 'Read saved scene AND inspect visual. Unsaved drawing edits are not captured.'}, ensure_ascii=False, indent=2))
     elif args.command == 'preview':

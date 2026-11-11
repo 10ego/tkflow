@@ -34,6 +34,11 @@ class FakeVault:
     def read(self, path):
         return self.docs[path]
 
+    def replace(self, path, content, expected):
+        if tkflow.digest(self.docs[path]) != expected:
+            raise tkflow.FlowError('Revision conflict')
+        self.docs[path] = content
+
 
 class BehaviorTests(unittest.TestCase):
     def setUp(self):
@@ -56,6 +61,7 @@ class BehaviorTests(unittest.TestCase):
         self.assertEqual(bridge.sketches, 1)
         self.assertEqual(bridge.opened[-1], 'Projects/my-idea/Sketch.excalidraw.md')
         self.assertEqual(tkflow.active_project(self.vault), 'my-idea')
+        self.assertEqual(bridge.docs['Home.md'].count('[[Projects/my-idea/Blueprint|'), 1)
 
     def test_initialize_does_not_touch_unrelated_folder(self):
         self.vault.mkdir()
