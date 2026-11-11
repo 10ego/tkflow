@@ -4,11 +4,18 @@ An Obsidian-first workflow plugin for Codex, Claude Code, OpenCode, and Pi.
 Sketch an idea, refine a blueprint that records why, then build and verify one
 observable behavior at a time.
 
-## Install as a plugin
+## Prerequisites
 
-Requires Node.js 22+ and Git. The workflow uses your agent host's existing model
-setup. There is no Python installer, Python runtime, or separate helper installation.
-The repository is private; your Git credentials must be able to read it.
+- [Obsidian desktop](https://obsidian.md/) with its official CLI enabled.
+- The Excalidraw community plugin installed and enabled in your dedicated tkflow vault.
+- Node.js 22+ and Git.
+- Codex, Claude Code, OpenCode 2.x, or Pi with an existing model setup.
+- Git credentials that can read this private repository.
+
+See [Obsidian setup](#obsidian-setup) for vault initialization and setup checks.
+There is no Python installer, Python runtime, or separate helper installation.
+
+## Install as a plugin
 
 ### Codex
 
