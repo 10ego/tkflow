@@ -4,6 +4,7 @@ import os from 'node:os';
 import { createHash, randomUUID } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { locateObsidian, requireCLI, connectionError, ObsidianCLIError } from './obsidian-cli.mjs';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const NOTES = ['Blueprint', 'Decisions', 'Status'];
@@ -47,12 +48,15 @@ export function saveArtifact(vault, relative, content) {
 }
 const q = JSON.stringify;
 export class Obsidian {
-  constructor(vault, execute = execFileSync) { this.vault = fs.realpathSync(vault); this.execute = execute; }
+  constructor(vault, execute = execFileSync, options = {}) { this.vault = fs.realpathSync(vault); this.execute = execute; this.discovery = options.discovery; }
   run(...args) {
-    let binary = process.env.TKFLOW_OBSIDIAN_CLI || 'obsidian';
-    if (!process.env.TKFLOW_OBSIDIAN_CLI && process.platform === 'darwin' && fs.existsSync('/Applications/Obsidian.app/Contents/MacOS/obsidian-cli')) binary = '/Applications/Obsidian.app/Contents/MacOS/obsidian-cli';
-    try { return this.execute(binary, [`vault=${path.basename(this.vault)}`, ...args], { encoding: 'utf8', timeout: 60000, maxBuffer: 64 * 1024 * 1024 }).trim(); }
-    catch (error) { throw Error(`Obsidian CLI: ${error.stderr?.toString().trim() || error.message}`); }
+    this.discovery ||= locateObsidian();
+    const binary = requireCLI(this.discovery);
+    try {
+      const output = this.execute(binary, [`vault=${path.basename(this.vault)}`, ...args], { encoding: 'utf8', timeout: 60000, maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+      if (/^Vault not found\.?$/i.test(output)) throw connectionError({ stdout: output }, this.discovery);
+      return output;
+    } catch (error) { if (error instanceof ObsidianCLIError) throw error; throw connectionError(error, this.discovery); }
   }
   evaluate(body) {
     const code = `(async()=>{try{if(app.vault.adapter.basePath!==${q(this.vault)})throw Error("Wrong vault path; refusing operation");const value=await(async()=>{${body}})();return JSON.stringify({tkflow:true,ok:true,value});}catch(e){return JSON.stringify({tkflow:true,ok:false,error:String(e.message||e)});}})()`;

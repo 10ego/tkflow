@@ -7,23 +7,41 @@ import { execFileSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { setTimeout } from 'node:timers/promises';
 import { pathToFileURL } from 'node:url';
-import { Obsidian, defaultVault, initVault, registerVault, activeProject, projectPath, start, digest, saveArtifact, handoff, checkpoint, NOTES } from './runtime.mjs';
+import { Obsidian, defaultVault, initVault, registerVault, activeProject, projectPath, digest, saveArtifact, handoff, checkpoint, NOTES } from './runtime.mjs';
 import { renderHTML } from './preview.mjs';
+import { locateObsidian, requireCLI, ObsidianCLIError } from './obsidian-cli.mjs';
+import { begin, connect } from './startup.mjs';
+export function reportError(error) { console.error(error instanceof ObsidianCLIError ? JSON.stringify(error.toJSON(), null, 2) : 'tkflow: ' + error.message); process.exitCode = 1; }
 export async function main(argv = process.argv.slice(2)) {
   const { values: args, positionals } = parseArgs({ args: argv, allowPositionals: true, options: {
-    vault: { type:'string' }, project:{type:'string'}, note:{type:'string',default:'Blueprint'}, from:{type:'string'}, expect:{type:'string'}, split:{type:'boolean'}, open:{type:'boolean'}, message:{type:'string'}, help:{type:'boolean',short:'h'},
+    vault: { type:'string' }, workspace:{type:'string'}, project:{type:'string'}, note:{type:'string',default:'Blueprint'}, from:{type:'string'}, expect:{type:'string'}, split:{type:'boolean'}, open:{type:'boolean'}, launch:{type:'boolean'}, message:{type:'string'}, help:{type:'boolean',short:'h'},
   }});
   const [command, ...rest] = positionals;
-  if (args.help || !command) { console.log('tkflow plugin helper\n\nCommands: init, register, doctor, setup-plugin, start [name], read, write, open, capture, preview, handoff, checkpoint\nOptions: --vault PATH --project NAME --note Blueprint|Decisions|Status --from FILE --expect SHA256 --split --open --message TEXT\nInstall the workflow through your host plugin manager; no standalone installer is required.'); return; }
-  const supported = ['init','register','doctor','setup-plugin','start','read','write','open','capture','preview','handoff','checkpoint'];
+  if (args.help || !command) { console.log('tkflow plugin helper\n\nCommands: begin [name], locate, init, register, doctor [--launch], setup-plugin, start [name], read, write, open, capture, preview, handoff, checkpoint\nOptions: --vault PATH --workspace PATH --project NAME --note Blueprint|Decisions|Status --from FILE --expect SHA256 --split --open --message TEXT\nbegin connects, creates or resumes a project, and opens its sketch in Obsidian. start is an alias.\nlocate discovers the CLI without app IPC. doctor reports connection errors with a bounded recovery path.\nInstall the workflow through your host plugin manager; no standalone installer is required.'); return; }
+  const supported = ['begin','locate','init','register','doctor','setup-plugin','start','read','write','open','capture','preview','handoff','checkpoint'];
   if (!supported.includes(command)) throw Error('Unknown command: ' + command);
   let vault = args.vault || process.env.TKFLOW_VAULT || defaultVault();
   if (vault.startsWith('~/')) vault = path.join(os.homedir(), vault.slice(2));
   vault = path.resolve(vault);
+  if (args.launch && command !== 'doctor') throw Error('--launch is supported only with doctor.');
+  if (command === 'locate') {
+    const discovery = locateObsidian();
+    console.log(JSON.stringify({ ...discovery, vault: { path: vault, name: path.basename(vault), exists: fs.existsSync(vault) } }, null, 2));
+    requireCLI(discovery); return;
+  }
   if (command === 'init') { console.log('Vault ready: ' + initVault(vault)); return; }
   if (command === 'register') { console.log(registerVault(vault)); return; }
-  const bridge = new Obsidian(vault);
-  if (command === 'doctor') { console.log(JSON.stringify(bridge.doctor(), null, 2)); return; }
+  if (command === 'begin' || command === 'start') {
+    console.log(JSON.stringify(await begin(vault, rest.join(' ') || undefined, { workspace: args.workspace }), null, 2)); return;
+  }
+  const discovery = locateObsidian();
+  requireCLI(discovery);
+  if (!fs.existsSync(vault)) throw new ObsidianCLIError('OBSIDIAN_VAULT_MISSING', 'The configured tkflow vault folder does not exist.', discovery, ['Initialize the dedicated vault explicitly with init, then register it if needed.']);
+  const bridge = new Obsidian(vault, execFileSync, { discovery });
+  if (command === 'doctor') {
+    const info = await connect(bridge, discovery, { launch: args.launch });
+    console.log(JSON.stringify({ status: 'ready', ...info, cli: discovery.cli, application: discovery.application, sandbox: discovery.sandbox }, null, 2)); return;
+  }
   if (command === 'setup-plugin') {
     let info = bridge.doctor();
     if (!info.communityPluginsEnabled) throw Error('Community plugins are disabled. Obtain explicit approval before enabling them in this vault; tkflow will not change restricted mode automatically.');
@@ -32,7 +50,6 @@ export async function main(argv = process.argv.slice(2)) {
     if (!info.automation) throw Error('Excalidraw automation is not ready; check the dedicated vault plugin state.');
     console.log(JSON.stringify(info,null,2)); return;
   }
-  if (command === 'start') { console.log('Opened ' + start(vault,bridge,rest.join(' ') || undefined) + '. Sketch and save, then invoke the blueprint command.'); return; }
   const project = activeProject(vault,args.project);
   if (['read','write','open'].includes(command)) {
     if (![...NOTES,'Sketch.excalidraw'].includes(args.note)) throw Error('Choose Blueprint, Decisions, Status, or Sketch.excalidraw.');
@@ -61,4 +78,4 @@ export async function main(argv = process.argv.slice(2)) {
   } else if (command === 'handoff') { console.log(handoff(vault,bridge,project));console.log('Give a fresh agent only Prompt.md and the three notes. Audit has NOT run yet.'); }
   else if (command === 'checkpoint') console.log(checkpoint(vault,project,args.message));
 }
-if (process.argv[1] && import.meta.url === pathToFileURL(fs.realpathSync(process.argv[1])).href) main().catch(error=>{console.error('tkflow: '+error.message);process.exitCode=1;});
+if (process.argv[1] && import.meta.url === pathToFileURL(fs.realpathSync(process.argv[1])).href) main().catch(reportError);

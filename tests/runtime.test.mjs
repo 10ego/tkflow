@@ -45,11 +45,11 @@ test('a matching revision saves through the same callback',async t=>{
  let saved='initial';await vm.runInNewContext(`(async()=>{${body}})()`,{app:{vault:{getFileByPath:()=>({}),process:async(_,callback)=>{saved=callback(saved);}}}});assert.equal(saved,'new intent');
 });
 test('wrong vault and failed CLI responses are never silently accepted',t=>{
- const {vault}=fixture(t);initVault(vault);let args;const b=new Obsidian(vault,(_,a)=>{args=a;return '=> {"tkflow":true,"ok":false,"error":"Wrong vault path"}';});assert.throws(()=>b.read('Blueprint.md'),/Wrong vault/);assert.ok(args[2].includes(fs.realpathSync(vault)));assert.equal(args[0],'vault=tkflow');
- const failed=new Obsidian(vault,()=>{throw Error('disconnected');});assert.throws(()=>failed.read('Blueprint.md'),/disconnected/);
+ const {vault}=fixture(t);initVault(vault);let args;const b=new Obsidian(vault,(_,a)=>{args=a;return '=> {"tkflow":true,"ok":false,"error":"Wrong vault path"}';},{discovery:{cli:{path:'obsidian'}}});assert.throws(()=>b.read('Blueprint.md'),/Wrong vault/);assert.ok(args[2].includes(fs.realpathSync(vault)));assert.equal(args[0],'vault=tkflow');
+ const failed=new Obsidian(vault,()=>{throw {stderr:'disconnected'};},{discovery:{cli:{path:'obsidian'}}});assert.throws(()=>failed.read('Blueprint.md'),/disconnected/);
 });
 test('shell metacharacters remain literal CLI arguments',t=>{
- const {vault}=fixture(t);initVault(vault);let args,options;const b=new Obsidian(vault,(_,a,o)=>{args=a;options=o;return '=> {"tkflow":true,"ok":true,"value":true}';});const text='$(touch /tmp/never) `secret` "quote"\nNext';b.create('Notes/test.md',text);assert.ok(Array.isArray(args));assert.ok(args[2].includes(JSON.stringify(text)));assert.equal(options.shell,undefined);
+ const {vault}=fixture(t);initVault(vault);let args,options;const b=new Obsidian(vault,(_,a,o)=>{args=a;options=o;return '=> {"tkflow":true,"ok":true,"value":true}';},{discovery:{cli:{path:'obsidian'}}});const text='$(touch /tmp/never) `secret` "quote"\nNext';b.create('Notes/test.md',text);assert.ok(Array.isArray(args));assert.ok(args[2].includes(JSON.stringify(text)));assert.equal(options.shell,undefined);
 });
 test('HTML escapes raw content, formats intent, and links the selected vault',()=>{
  const html=renderHTML('# Purpose\n\n> [!abstract] Intent\n> Keep ideas\n\n- **Why:** useful\n\n<script>alert(1)</script>\n\n[[Projects/a/Blueprint|Read intent]]','Demo <unsafe>','Other Vault');

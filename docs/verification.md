@@ -104,3 +104,22 @@ clean marketplace clone through Claude's native updater, and preserved the insta
 plugin. The refreshed cache uses the verified `10egogh` SSH identity for its private
 repository. Native add, update, and install then succeeded; tkflow remained enabled
 at 0.2.0 and unrelated Claude settings were unchanged.
+
+## 0.3.0 — project initiation and CLI discovery (2026-11-11)
+
+- `begin` (also `start`) connects, creates/resumes the project, and brings Obsidian
+  forward at its exact sketch. Explicit workspace bindings select the corresponding
+  project independently of the last active project.
+- CLI discovery is bounded and filesystem-only. A found binary with a failed app
+  connection reports structured recovery actions rather than inferring absence.
+- Reproduced sandbox IPC failure with the installed CLI. Retrying the identical
+  `node skills/tkflow/scripts/run.mjs begin` through normal host approval returned
+  `status: opened`. Independent official CLI eval confirmed the active vault path
+  `/Users/ted.kim/Documents/tkflow` and file
+  `Projects/first-idea/Sketch.excalidraw.md`. Existing notes/sketch were resumed.
+- `npm test`: 47 passed. New-project creation, workspace bindings, stopped/running
+  app behavior, failed reveals, and saved-content preservation use isolated fixtures.
+  Stopped-app launch and Linux/Windows paths were not tested against live apps.
+- `git diff --check` passed. `claude plugin validate .` passed with listing warnings:
+  marketplace description, missing directory-submission license, and icon. No public
+  directory submission or licensing change was performed.

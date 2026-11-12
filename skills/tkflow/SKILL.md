@@ -10,7 +10,8 @@ the host's advertised skill path, then use `node <this-skill-directory>/scripts/
 as the runner for every helper command below. References to `tkflow doctor`,
 `tkflow read`, etc. mean that runner followed by the command; no global helper
 installation is required. Node.js 22+ is required. Default vault: `~/Documents/tkflow`.
-Run the runner with `--help` for syntax and `doctor` before the first live operation.
+For initiation, execute `begin` as described below; it performs connection checks.
+Use `locate` for filesystem-only CLI discovery and `doctor` for read-only diagnostics.
 All live operations explicitly target and validate that vault through Obsidian CLI.
 Do not operate on the user's other vaults. Do not silently replace CLI failures with disk writes.
 `tkflow` is already the vault. Save each actual project directly under
@@ -19,17 +20,42 @@ records belong in `System/` and demonstrations in `Examples/`.
 
 ## Start or resume
 
-- `/tkflow` with no project resumes the active project; without one, create a uniquely
-  named idea using `tkflow start`. With a project name, use `tkflow start "name"`.
-- The tool creates a sketch and linked blueprint, decisions, and status notes, then
-  opens the drawing. Resume reads the three notes before deciding the next action.
+- On `/tkflow` or the start command, **execute** `tkflow begin "project name"` using
+  the bundled runner. Without a name, `begin` resumes the active project or creates
+  a new idea. Do not stop after checking setup or merely describe these steps.
+- When initiating for the repository/workspace the user is working in, pass
+  `--workspace /absolute/workspace/path`. This creates its corresponding project or
+  resumes its saved binding instead of opening an unrelated last-used project.
+- `begin` connects through the CLI, starts the known app bundle if it is stopped,
+  creates the sketch and linked blueprint/decisions/status notes, and brings Obsidian
+  forward at that exact vault and sketch. Notes and drawings are preserved on resume.
+- Only after `begin` returns `status: opened`, tell the user where to draw. Read the
+  three notes on resume to identify the next step. Do not claim the sketch opened
+  when the command failed.
 - Do not invent a blueprint from an empty sketch. Let the user draw. Use their
   conversation text as additional stated input when available.
+
+## CLI connection recovery
+
+- `locate` resolves `TKFLOW_OBSIDIAN_CLI`, PATH, and standard app-bundle CLI paths.
+  It does not need app IPC. Treat its exact executable path as installation evidence.
+- `OBSIDIAN_APP_UNREACHABLE` with a found executable is a connection failure, not
+  proof of a missing app. In a sandboxed host, retry the **same bundled begin/doctor
+  command** through the host's normal approval mechanism outside the sandbox first.
+- Do not fall back to GUI automation, Spotlight, `find`, app-name guessing, or note
+  writes on disk. If the host cannot grant the needed access, provide the exact
+  helper command to run in a normal terminal and report startup as pending.
+- `begin` distinguishes a visible running process from a stopped or unobservable
+  one. A stopped macOS app is started by its absolute bundle path through a terminal
+  command. No automatic restart, permission changes, or sandbox disabling occur.
+- First-time vault registration or Excalidraw setup may still be required. Follow
+  the reported setup action; community-plugin/security changes require explicit
+  approval. Once setup is complete, retry begin and open the project.
 
 The command set also exposes `/tkflow-start`, `/tkflow-blueprint`, `/tkflow-refine`,
 `/tkflow-build`, `/tkflow-status`, and `/tkflow-verify`. These select the corresponding
 workflow below. Codex can explicitly invoke the same skills with `$tkflow-*`.
-OpenCode and Pi use prompt commands to load this shared skill; Claude and Codex use
+OpenCode and Pi use native commands to load this shared skill; Claude and Codex use
 skills. Never assume that another host supports fresh subagents: if it cannot launch
 an independent context, prepare the packet for a new session and report the audit pending.
 

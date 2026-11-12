@@ -60,7 +60,7 @@ registers the seven commands, plus the shared workflow skill.
 
 | Command | Behavior |
 | --- | --- |
-| `/tkflow` | Start or resume the active project |
+| `/tkflow` | Create or resume this workspace’s project and open its sketch in Obsidian |
 | `/tkflow-start My idea` | Open a new or existing project sketch |
 | `/tkflow-blueprint` | Inspect the saved drawing and draft an intent-rich blueprint |
 | `/tkflow-refine` | Refine the blueprint and decision log |
@@ -71,6 +71,12 @@ registers the seven commands, plus the shared workflow skill.
 Claude prefixes these skill names with `tkflow:`; Codex also accepts explicit
 `$tkflow-*` skill invocation. `/tkflow blueprint` and other mode arguments remain
 supported by the shared workflow.
+
+Initiating tkflow runs one bundled `begin` action: connect through the CLI, create
+or resume `Projects/<project>/` with its sketch and linked notes, then bring Obsidian
+forward at that exact sketch. The agent passes the current workspace so another
+project’s last-used sketch does not take its place. Saved notes and drawings are
+preserved. Give a project name to choose it explicitly.
 
 ## Obsidian setup
 
@@ -90,6 +96,18 @@ already been enabled with explicit approval before installing Excalidraw.
 Each live request validates the actual vault path and uses the official Obsidian CLI.
 CLI failures are reported; they never trigger a silent fallback to disk note writes.
 Derived captures, previews, and temporary handoff packets are local artifacts.
+
+CLI discovery checks `TKFLOW_OBSIDIAN_CLI`, PATH, and standard installation paths,
+including macOS’s bundled `/Applications/Obsidian.app/Contents/MacOS/obsidian-cli`.
+Use `locate` to check discovery without connecting to the app. For a nonstandard
+installation, set `TKFLOW_OBSIDIAN_CLI` to the absolute executable path.
+
+A found CLI reporting “unable to find Obsidian” can indicate sandbox IPC restrictions.
+The agent retries the exact helper command through the host’s normal approval
+mechanism outside the sandbox. It does not search with Spotlight, guess app names,
+or use desktop automation. `begin` starts a stopped macOS app through its known
+absolute bundle path; it never restarts an existing app. If access remains blocked,
+startup stays pending and the agent gives you the exact terminal command to run.
 
 ## Project record
 
@@ -133,7 +151,8 @@ plugin cache without a checkout or a global command. For local development:
 ```sh
 node skills/tkflow/scripts/run.mjs --help
 node skills/tkflow/scripts/run.mjs doctor
-node skills/tkflow/scripts/run.mjs start "My idea"
+node skills/tkflow/scripts/run.mjs locate
+node skills/tkflow/scripts/run.mjs begin "My idea" --workspace /absolute/project/path
 node skills/tkflow/scripts/run.mjs capture
 node skills/tkflow/scripts/run.mjs preview --open
 node skills/tkflow/scripts/run.mjs handoff
