@@ -2,7 +2,7 @@
 name: tkflow-refine
 description: Refine the current blueprint and its rationale. Use when the user invokes /tkflow-refine or $tkflow-refine.
 ---
-Use the tkflow workflow to refine: reconcile the current notes and refine the blueprint.
+Use the tkflow workflow to refine: inspect and reconcile the Markdown rules/contracts and editable Excalidraw wireframes, preserving user edits and recording visual/text mismatches.
 
 Load the shared tkflow skill. It is the sibling `tkflow/SKILL.md` beside this skill's
 directory inside the plugin. If the host has no skill-loading tool, read that file

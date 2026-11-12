@@ -71,7 +71,7 @@ export async function main(argv = process.argv.slice(2)) {
     const drawing=args.note==='Blueprint'?'Sketch.excalidraw':args.note;
     if (!['Sketch.excalidraw','Wireframes.excalidraw'].includes(drawing)) throw Error('capture supports Sketch.excalidraw or Wireframes.excalidraw.');
     const result=bridge.capture(projectPath(project,drawing));
-    result.scene.elements=result.scene.elements.filter(e=>!e.isDeleted);result.scene.tkflowSource=result.source;
+    result.scene.tkflowSource=result.source;
     const base=`Projects/${project}/Evidence/${drawing.split('.')[0].toLowerCase()}-${Date.now()}-${randomUUID().slice(0,6)}`;
     const scene=saveArtifact(vault,base+'.json',JSON.stringify(result.scene,null,2));
     const svg=saveArtifact(vault,base+'.svg',result.svg);
