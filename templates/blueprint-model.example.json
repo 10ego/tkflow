@@ -1,0 +1,359 @@
+{
+  "version": 1,
+  "title": "Studio Desk",
+  "intent": "A small design studio turns incoming client requests into clear briefs, without losing the reason behind a revision.",
+  "platform": "desktop",
+  "theme": {
+    "primary": "#315bc7",
+    "accent": "#a54b15",
+    "surface": "#f3f6fb",
+    "density": "comfortable",
+    "tone": "Calm, precise and welcoming; important decisions stay visible."
+  },
+  "observations": [
+    "Synthetic reference for renderer verification; not an approved user product.",
+    "Requests, brief editing and review form one continuous journey."
+  ],
+  "assumptions": [
+    "Desktop layout and the sample copy are provisional example choices."
+  ],
+  "screens": [
+    {
+      "id": "inbox",
+      "name": "Request inbox",
+      "purpose": "Find the next request and understand what needs attention before opening it.",
+      "components": [
+        {
+          "id": "inbox-nav",
+          "type": "nav",
+          "label": "Studio Desk",
+          "items": [
+            "Requests",
+            "Briefs",
+            "Review"
+          ]
+        },
+        {
+          "id": "inbox-head",
+          "type": "header",
+          "label": "Client requests",
+          "items": [
+            "New request"
+          ],
+          "behaviors": [
+            "B-001"
+          ]
+        },
+        {
+          "id": "inbox-stats",
+          "type": "stats",
+          "label": "This week",
+          "items": [
+            "4 requests awaiting a brief",
+            "2 briefs ready for review"
+          ],
+          "width": "half"
+        },
+        {
+          "id": "inbox-cards",
+          "type": "cards",
+          "label": "Needs attention",
+          "items": [
+            "Cedar Bakery · Launch packaging",
+            "Northline Studio · Portfolio refresh"
+          ],
+          "width": "half",
+          "behaviors": [
+            "B-001"
+          ]
+        },
+        {
+          "id": "inbox-table",
+          "type": "table",
+          "label": "Incoming requests",
+          "items": [
+            "Client",
+            "Request",
+            "Status"
+          ],
+          "rows": [
+            [
+              "Cedar Bakery",
+              "Spring packaging",
+              "Needs brief"
+            ],
+            [
+              "Northline Studio",
+              "Portfolio refresh",
+              "Clarify scope"
+            ]
+          ],
+          "behaviors": [
+            "B-001"
+          ]
+        },
+        {
+          "id": "inbox-empty",
+          "type": "empty",
+          "label": "When the inbox is clear",
+          "items": [
+            "No requests need attention.",
+            "New requests appear here when submitted."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "brief",
+      "name": "Edit brief",
+      "purpose": "Capture the desired outcome and rationale, then save a recoverable draft.",
+      "components": [
+        {
+          "id": "brief-nav",
+          "type": "nav",
+          "label": "Studio Desk",
+          "items": [
+            "Requests",
+            "Briefs",
+            "Review"
+          ]
+        },
+        {
+          "id": "brief-head",
+          "type": "header",
+          "label": "Cedar Bakery · Spring packaging",
+          "items": [
+            "Save draft"
+          ],
+          "behaviors": [
+            "B-002"
+          ]
+        },
+        {
+          "id": "brief-fields",
+          "type": "form",
+          "label": "Project brief",
+          "items": [
+            "Desired customer outcome",
+            "Scope and constraints",
+            "Why this direction matters"
+          ],
+          "width": "half",
+          "behaviors": [
+            "B-002"
+          ]
+        },
+        {
+          "id": "brief-notes",
+          "type": "list",
+          "label": "Source notes",
+          "items": [
+            "New customers should recognize the seasonal range.",
+            "Keep the existing bakery mark."
+          ],
+          "width": "half"
+        },
+        {
+          "id": "brief-loading",
+          "type": "loading",
+          "label": "Saving your draft…",
+          "items": [
+            "Keep the form visible until saving finishes."
+          ],
+          "width": "half",
+          "behaviors": [
+            "B-002"
+          ]
+        },
+        {
+          "id": "brief-error",
+          "type": "error",
+          "label": "Your draft could not be saved",
+          "items": [
+            "Your text is still here. Try saving again."
+          ],
+          "width": "half",
+          "behaviors": [
+            "B-002"
+          ]
+        },
+        {
+          "id": "brief-submit",
+          "type": "button",
+          "label": "Send for review",
+          "behaviors": [
+            "B-003"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "review",
+      "name": "Review direction",
+      "purpose": "Read the brief and the reason for the proposed direction before approving it.",
+      "components": [
+        {
+          "id": "review-nav",
+          "type": "nav",
+          "label": "Studio Desk",
+          "items": [
+            "Requests",
+            "Briefs",
+            "Review"
+          ]
+        },
+        {
+          "id": "review-head",
+          "type": "header",
+          "label": "Review the spring packaging brief",
+          "behaviors": [
+            "B-003"
+          ]
+        },
+        {
+          "id": "review-summary",
+          "type": "text",
+          "label": "Desired outcome",
+          "items": [
+            "Help new customers recognize the seasonal range.",
+            "Preserve the bakery mark and simplify the package hierarchy."
+          ],
+          "width": "half"
+        },
+        {
+          "id": "review-checks",
+          "type": "list",
+          "label": "Before approval",
+          "items": [
+            "Outcome is clear",
+            "Constraints are recorded",
+            "Rationale is visible"
+          ],
+          "width": "half"
+        },
+        {
+          "id": "review-dialog",
+          "type": "dialog",
+          "label": "Approve this direction?",
+          "items": [
+            "Approval records this version of the brief.",
+            "Confirm approval / Keep reviewing"
+          ],
+          "behaviors": [
+            "B-003"
+          ]
+        },
+        {
+          "id": "review-toggle",
+          "type": "toggle",
+          "label": "Review preferences",
+          "items": [
+            "Show source notes",
+            "Highlight unresolved questions"
+          ]
+        }
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "id": "open-request",
+      "from": "inbox",
+      "to": "brief",
+      "trigger": "Open Cedar Bakery request · B-001"
+    },
+    {
+      "id": "submit-review",
+      "from": "brief",
+      "to": "review",
+      "trigger": "Send saved brief for review · B-003"
+    },
+    {
+      "id": "return-inbox",
+      "from": "review",
+      "to": "inbox",
+      "trigger": "After approval, return to requests · B-003"
+    }
+  ],
+  "entities": [
+    {
+      "id": "request",
+      "name": "Request",
+      "fields": [
+        "Client name",
+        "Desired outcome",
+        "Received date",
+        "Status"
+      ]
+    },
+    {
+      "id": "brief",
+      "name": "Brief",
+      "fields": [
+        "Request reference",
+        "Scope and constraints",
+        "Direction rationale",
+        "Saved version"
+      ],
+      "why": "Keep the reason beside each proposal."
+    },
+    {
+      "id": "approval",
+      "name": "Approval",
+      "fields": [
+        "Brief version",
+        "Reviewer",
+        "Decision time"
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "id": "B-001",
+      "category": "access",
+      "strength": "must",
+      "text": "Studio members can open requests in their shared inbox.",
+      "why": "The example assumes a private studio workspace.",
+      "provenance": "provisional",
+      "source": "Synthetic renderer fixture"
+    },
+    {
+      "id": "B-002",
+      "category": "data",
+      "strength": "must",
+      "text": "A failed save leaves the draft text visible and available to retry.",
+      "why": "A transient failure should not erase the author’s work.",
+      "provenance": "stated",
+      "source": "Synthetic renderer fixture"
+    },
+    {
+      "id": "B-003",
+      "category": "behavior",
+      "strength": "must",
+      "text": "Approval records the exact saved brief version the reviewer saw.",
+      "why": "Later edits must not silently change an approved direction.",
+      "provenance": "stated",
+      "source": "Synthetic renderer fixture"
+    },
+    {
+      "id": "B-004",
+      "category": "feel",
+      "strength": "should",
+      "text": "Explain problems with a clear next action and calm wording.",
+      "why": "Review should help the studio move work forward.",
+      "provenance": "inferred",
+      "source": "Synthetic visual direction"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D-001",
+      "question": "When a brief changes after approval, what should the reviewer see?",
+      "options": [
+        "A new review request",
+        "A change summary beside the existing approval"
+      ],
+      "recommendation": "A new review request, provisionally, so the approval stays attached to its original version."
+    }
+  ]
+}

@@ -26,7 +26,7 @@ export function wireframeDocument(scene, current) {
   // Callback replacements keep dollar signs in user labels literal. Keep other
   // Markdown sections (including embedded-file references) and frontmatter intact.
   return current.replace(drawing,(_,heading)=>heading+'```json\n'+JSON.stringify(normalized,null,2)+'\n```')
-    .replace(/(^## Text Elements\s*\n)[\s\S]*?(?=^## |^%%)/m,(_,heading)=>heading+'\n'+text+'\n');
+    .replace(/(^## Text Elements[ \t]*\r?\n)[\s\S]*?(?=^## |^%%)/m,(_,heading)=>heading+text+'\n');
 }
 export function saveWireframes(bridge, file, scene, expected) {
   const current=bridge.read(file);

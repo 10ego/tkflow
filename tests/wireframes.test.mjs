@@ -5,7 +5,7 @@ import {digest} from '../src/runtime.mjs';
 const current='---\nexcalidraw-plugin: parsed\n---\nUser notes stay.\n## Text Elements\nOld ^old\n\n## Embedded Files\nasset: [[keep.png]]\n\n%%\n## Drawing\n```compressed-json\nold-data\n```\n%%';
 const scene={elements:[{id:'b001',type:'text',x:20,y:30,width:300,height:25,text:'B-001 — $& saved',link:'[[Projects/app/Blueprint#B-001]]'}]};
 test('generated wireframe stays editable and preserves notes, links and embedded references',()=>{
- const text=wireframeDocument(scene,current);assert.ok(text.includes('User notes stay.'));assert.ok(text.includes('asset: [[keep.png]]'));assert.ok(text.includes('B-001 — $& saved ^b001'));assert.ok(!text.includes('old-data'));
+ const text=wireframeDocument(scene,current);assert.ok(text.includes('User notes stay.'));assert.ok(text.includes('## Text Elements\nB-001'));assert.ok(!text.includes('## Text Elements\n\n'));assert.ok(text.includes('asset: [[keep.png]]'));assert.ok(text.includes('B-001 — $& saved ^b001'));assert.ok(!text.includes('old-data'));
  const saved=JSON.parse(/```json\n([\s\S]*?)\n```/.exec(text)[1]);assert.equal(saved.elements[0].type,'text');assert.equal(saved.elements[0].link,scene.elements[0].link);assert.equal(saved.elements[0].fontSize,20);
 });
 test('refinement preserves captured element metadata and files',()=>{
