@@ -50,13 +50,16 @@ Use the component vocabulary to design screens with deliberate hierarchy:
 
 ## Compose and preserve saved edits
 
-1. `begin` creates missing project drawings while preserving saved content.
+1. Use `begin --background` if project preparation is needed. It adds missing
+   drawings without opening a sketch or focusing Obsidian. Do not run foreground
+   `begin` for blueprint generation. A closed/unregistered vault is reported for
+   setup rather than automatically opening its window during background preparation.
 2. Read `read --note Wireframes.excalidraw` for its SHA256 token. On refinement,
    capture the drawing with `capture --note Wireframes.excalidraw` and inspect its
    PNG and scene, including user annotations, before proposing changes.
 3. Save model JSON to a temporary file. Run:
 
-   `compose --from /absolute/model.json --expect SHA256 --open`
+   `compose --from /absolute/model.json --expect SHA256`
 
    The helper validates the model, captures the saved drawing, renders editable
    elements, and uses guarded live CLI replacement. Its output gives screen/component
@@ -66,7 +69,7 @@ Use the component vocabulary to design screens with deliberate hierarchy:
    a generated output. Saved editor/drawing changes are required before capture.
 4. A conflict is a merge task. Inspect the captured scene and the user's edits;
    reconcile intent/rules and record why. Use `wireframe --from /absolute/scene.json
-   --expect SHA256 --open` for a deliberate merged scene, preserving existing IDs,
+   --expect SHA256` for a deliberate merged scene, preserving existing IDs,
    files, metadata and unrelated notes. Do not remove ownership metadata or refresh
    the revision token merely to bypass protection. Boards made before semantic
    composition have no ownership baseline and require this same deliberate merge.
@@ -95,6 +98,13 @@ Before presenting the blueprint, check and repair:
   deferred. Alternate states are identified; a wireframe does not prove interactions.
 - Screen/component B-IDs, Markdown contracts and acceptance scenarios agree.
 - Source observations, visual assumptions and costly open decisions are distinguished.
+
+Only after both artifacts are saved, visual checks and repairs are complete, and
+Status is updated, execute `open --note Wireframes.excalidraw`. This final command
+selects the finished drawing and focuses Obsidian. Do not use `--open` on compose,
+wireframe, or preview during generation/review. If generation is blocked or fails,
+report the pending work without switching focus. Explicit user requests to view an
+intermediate result can override this timing.
 
 Record screen/state descriptions and the screen/component-to-B/A-ID map in Markdown,
 plus the final capture's source SHA256 and model evidence path. This keeps the

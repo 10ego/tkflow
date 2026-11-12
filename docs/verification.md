@@ -174,3 +174,21 @@ at 0.2.0 and unrelated Claude settings were unchanged.
   `npm pack --dry-run --json` includes renderer, schema guidance, full example and
   native library. `git diff --check` passed. Claude plugin validation passed with
   existing directory-listing warnings (license, icon, marketplace description).
+
+## 0.5.1 — focus only after blueprint completion (2026-11-11)
+
+- Traced premature opening to foreground `begin` in blueprint preparation and
+  `compose --open` in authoring instructions. The initiation/start flow remains
+  foreground; blueprint preparation now uses `begin --background` instead.
+- Background preparation creates/resumes records without selecting the source
+  sketch or requesting app reveal. Closed vaults report setup rather than opening
+  a window during background preparation. It returns `prepared`, not `opened`.
+- Blueprint composition/merges/review omit `--open`. After both artifacts, checks,
+  repairs and Status are complete, explicit `open --note Wireframes.excalidraw`
+  selects the finished file and invokes native app reveal. Failures stay pending.
+- `npm test`: 68 passed, including background create/resume, closed-vault refusal,
+  presentation ordering and no focus after failed selection. Live official CLI
+  background preparation returned `prepared` and left the current active file
+  `Projects/albumdiary/Wireframes.excalidraw.md` unchanged. No live foreground
+  transition or full model generation was performed for this timing-only change.
+- Both changed skills passed quick validation; `git diff --check` passed.

@@ -77,11 +77,13 @@ AND editable `Wireframes.excalidraw.md`; do not stop at a blank drawing, an imag
 or a promise to generate one. Follow [wireframe authoring](references/wireframes.md). Use its semantic model and
 `compose` component renderer by default; individual coordinates are for deliberate
 manual merges or unsupported custom components.
-For older projects run `begin` first to add the missing drawing without replacing
+For older projects run `begin --background` first to add the missing drawing without replacing
 saved notes. Capture/read existing wireframes before refinement. Preserve user
 elements and notes, reconcile both representations with shared B-IDs, and record
-the reviewed drawing hash and unresolved mismatches in Blueprint/Status. Open the
-generated wireframe after saving. If visual inspection is unavailable, report that
+the reviewed drawing hash and unresolved mismatches in Blueprint/Status. Keep
+Obsidian in the background throughout generation and visual checks; use no `--open`
+flags. Only after both artifacts, checks, and Status are complete, run
+`open --note Wireframes.excalidraw` to focus Obsidian on the finished result. If visual inspection is unavailable, report that
 verification pending; do not claim the drawing was reviewed.
 Run `tkflow preview` after refinement to regenerate the optional HTML view.
 

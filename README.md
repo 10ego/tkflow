@@ -140,11 +140,16 @@ The Markdown includes rules/contracts and a screen-to-behavior map so fresh agen
 can continue from the three notes alone. A blank drawing is not a completed blueprint.
 
 The model normally authors a structured product model and uses the bundled
-`compose --from model.json --expect SHA256 --open` helper, using the revision from
+`compose --from model.json --expect SHA256` helper, using the revision from
 `read --note Wireframes.excalidraw`. The renderer supplies a consistent component
 library, wrapping, spacing, desktop/mobile layouts, named flow arrows, and intent,
 data, rulebook and decision panels. The lower-level `wireframe` helper remains
 available for deliberate scene merges and custom components.
+Blueprint generation prepares with `begin --background` and leaves app focus alone
+while composing, saving and reviewing. Only after both artifacts, visual checks and
+Status are complete does `open --note Wireframes.excalidraw` focus Obsidian on the
+finished board. Ordinary `/tkflow` sketch initiation still opens the sketch.
+
 It then captures and visually checks the saved wireframe with `capture --note
 Wireframes.excalidraw`. Stale revisions are rejected; existing drawings are merged
 rather than replaced from memory. Regeneration refuses to overwrite modified or

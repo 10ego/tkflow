@@ -115,7 +115,7 @@ export function activeProject(vault, supplied) {
   return slugify(JSON.parse(fs.readFileSync(file, 'utf8')).project);
 }
 export const projectPath = (project, note) => `Projects/${project}/${note}.md`;
-export function start(vault, bridge, name) {
+export function start(vault, bridge, name, options = {}) {
   if (!fs.existsSync(path.join(vault, '.tkflow'))) throw Error('Initialize the tkflow vault first.');
   let slug = name && slugify(name);
   if (!slug) {
@@ -145,7 +145,7 @@ export function start(vault, bridge, name) {
     bridge.replace('Home.md', updated, digest(home));
   }
   atomicWrite(path.join(vault, '.tkflow/active.json'), JSON.stringify({ project: slug }, null, 2));
-  bridge.open(projectPath(slug, 'Sketch.excalidraw'));
+  if (options.open !== false) bridge.open(projectPath(slug, 'Sketch.excalidraw'));
   return slug;
 }
 export function handoff(vault, bridge, project) {

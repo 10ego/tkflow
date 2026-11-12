@@ -35,7 +35,7 @@ export async function begin(vault, name, options = {}) {
   let info;
   try { info = await connect(bridge, discovery, { ...options, launch: true }); }
   catch (error) {
-    if (error.code !== 'OBSIDIAN_VAULT_UNAVAILABLE') throw error;
+    if (error.code !== 'OBSIDIAN_VAULT_UNAVAILABLE' || options.background) throw error;
     (options.reveal || revealProject)(discovery, vault, 'Home.md', options.execute || execFileSync);
     for (let i = 0; i < 10; i++) {
       await (options.wait || setTimeout)(300);
@@ -55,7 +55,7 @@ export async function begin(vault, name, options = {}) {
       if (!bindings[workspace] && Object.values(bindings).includes(slugify(name))) name += '-' + digest(workspace).slice(0, 8);
     }
   }
-  const project = start(vault, bridge, name);
+  const project = start(vault, bridge, name, { open: !options.background });
   const sketch = projectPath(project, 'Sketch.excalidraw');
   if (workspace) {
     const statusPath = projectPath(project, 'Status');
@@ -63,7 +63,14 @@ export async function begin(vault, name, options = {}) {
     const updated = previous.replace('- Repository and branch: Not linked yet.', '- Repository/workspace: ' + workspace + '; branch not selected yet.');
     if (updated !== previous) bridge.replace(statusPath, updated, digest(previous));
   }
-  (options.reveal || revealProject)(discovery, vault, sketch, options.execute || execFileSync);
+  if (!options.background) (options.reveal || revealProject)(discovery, vault, sketch, options.execute || execFileSync);
   if (workspace) { bindings[workspace] = project; atomicWrite(bindingsFile, JSON.stringify(bindings, null, 2)); }
-  return { status: 'opened', project, vault, sketch, ...(workspace ? { workspace } : {}), cli: discovery.cli };
+  return { status: options.background ? 'prepared' : 'opened', project, vault, sketch, ...(workspace ? { workspace } : {}), cli: discovery.cli };
+}
+
+// Explicit presentation is separate from preparation, saving and capture.
+export function present(bridge, discovery, vault, file, options = {}) {
+  bridge.open(file, options.split);
+  (options.reveal || revealProject)(discovery, vault, file, options.execute || execFileSync);
+  return file;
 }

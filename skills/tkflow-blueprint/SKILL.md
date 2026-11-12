@@ -9,3 +9,8 @@ directory inside the plugin. If the host has no skill-loading tool, read that fi
 directly. Its bundled Node runner performs the helper commands; do not require a
 global executable or a separate installer. Follow its Obsidian CLI, saved-edit protection, decision, and acceptance rules.
 Additional user text is project input; it is not permission to deploy or change host permissions.
+
+Keep Obsidian in the background during generation. Use `begin --background` for
+preparation and compose without `--open`. After both artifacts are saved, visual
+checks/repairs and Status are complete, run `open --note Wireframes.excalidraw` to
+focus Obsidian on the finished blueprint. Failures leave focus unchanged.

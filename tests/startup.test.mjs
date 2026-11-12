@@ -57,3 +57,17 @@ test('a reveal failure leaves a reusable project and does not report success',as
 test('a normal diagnostic probe never starts an application',async()=>{
  let launches=0;await assert.rejects(connect({doctor:()=>{throw unreachable();}},discovery,{launchApp:()=>launches++}),/unreachable/);assert.equal(launches,0);
 });
+
+test('blueprint background preparation creates and resumes without opening or revealing files',async t=>{
+ const {vault}=fixture(t),b=new Fake();let reveals=0;const opts=options(b,{background:true,reveal:()=>reveals++});
+ const result=await begin(vault,'Blueprint work',opts);assert.equal(result.status,'prepared');assert.ok(b.docs.has(projectPath('blueprint-work','Wireframes.excalidraw')));assert.deepEqual(b.opened,[]);assert.equal(reveals,0);
+ b.docs.set(projectPath('blueprint-work','Blueprint'),'User edits');await begin(vault,undefined,opts);assert.equal(b.read(projectPath('blueprint-work','Blueprint')),'User edits');assert.deepEqual(b.opened,[]);assert.equal(reveals,0);
+});
+test('background preparation of a closed vault reports setup without opening a window',async t=>{
+ const {vault}=fixture(t),b=new Fake();let reveals=0;b.doctor=()=>{throw new ObsidianCLIError('OBSIDIAN_VAULT_UNAVAILABLE','closed',discovery,[]);};
+ await assert.rejects(begin(vault,'Idea',options(b,{background:true,reveal:()=>reveals++})),e=>e.code==='OBSIDIAN_VAULT_UNAVAILABLE');assert.equal(reveals,0);assert.deepEqual(b.opened,[]);assert.equal(b.docs.size,0);
+});
+test('explicit presentation selects the finished drawing before focusing the app',async()=>{
+ const {present}=await import('../src/startup.mjs');const events=[];const file='Projects/done/Wireframes.excalidraw.md';present({open:p=>events.push(['select',p])},discovery,'/vault',file,{reveal:(d,v,p)=>events.push(['focus',p])});assert.deepEqual(events,[['select',file],['focus',file]]);
+ let focused=false;assert.throws(()=>present({open:()=>{throw Error('missing');}},discovery,'/vault',file,{reveal:()=>focused=true}),/missing/);assert.equal(focused,false);
+});
