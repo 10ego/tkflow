@@ -7,7 +7,7 @@ cssclasses:
 ---
 # {{title}}
 
-[[Projects/{{slug}}/Sketch.excalidraw|Sketch]] · [[Projects/{{slug}}/Decisions|Decisions]] · [[Projects/{{slug}}/Status|Status]]
+[[Projects/{{slug}}/Sketch.excalidraw|Sketch]] · [[Projects/{{slug}}/Wireframes.excalidraw|Wireframes]] · [[Projects/{{slug}}/Decisions|Decisions]] · [[Projects/{{slug}}/Status|Status]]
 
 > [!abstract] Intent
 > Draft. Describe the person, their problem, the outcome, and why it matters before building.
@@ -41,6 +41,21 @@ Do not assume a generic principle settles an unrelated product choice.
 - Why: Unresolved.
 - Empty, loading, failure, permission, interruption, and recovery behavior: Unresolved where relevant.
 - Constraints and explicit non-goals: Unresolved.
+
+## Rules and contracts
+
+For each B-ID, record inputs, allowed actions, permissions, state transitions,
+validation, persistence, and observable success/failure/recovery guarantees.
+Separate approved rules from provisional interpretations and explain why.
+
+## Wireframe map
+
+Editable experience: [[Projects/{{slug}}/Wireframes.excalidraw|Wireframes]].
+Map each screen/state and element IDs to B-IDs and A-IDs. Include navigation and
+empty/loading/error states where relevant. Label visual assumptions as provisional.
+Markdown governs precise rules; resolve and log visual/text mismatches before
+marking the affected slice ready. Record the reviewed drawing SHA256 here so later
+agents can detect edits. Keep screen/state descriptions here for fresh continuation.
 
 ## Acceptance scenarios
 

@@ -45,3 +45,12 @@ wait for an answer and continue independent work.
 When intent changes, revise the behavior and affected acceptance scenarios together,
 record the reason and affected slices, and explicitly identify built behavior needing rework.
 Generated HTML is derived output; edit Markdown in Obsidian.
+
+## Deliver both representations
+
+Generate editable Excalidraw wireframes as well as Markdown on blueprint invocation.
+Follow [wireframe authoring](wireframes.md). Rules and contracts live in Markdown;
+screens, states, and navigation live in the drawing. Map both with the same B-IDs.
+During refinement inspect both, record mismatches and resolve using stated intent
+and the decision log. Visual edits do not automatically approve costly new rules.
+Keep screen/state descriptions in Markdown so the three-note audit is self-contained.

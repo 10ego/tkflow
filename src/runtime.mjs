@@ -129,6 +129,7 @@ export function start(vault, bridge, name) {
     bridge.create(projectPath(slug, note), template.replaceAll('{{title}}', title).replaceAll('{{slug}}', slug));
   }
   bridge.createSketch(projectPath(slug, 'Sketch.excalidraw'));
+  bridge.createSketch(projectPath(slug, 'Wireframes.excalidraw'));
   bridge.create('Home.md', '# tkflow\n\n## Projects\n');
   const home = bridge.read('Home.md');
   if (!home.includes(`[[Projects/${slug}/Blueprint|`)) {

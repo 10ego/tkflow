@@ -62,7 +62,7 @@ registers the seven commands, plus the shared workflow skill.
 | --- | --- |
 | `/tkflow` | Create or resume this workspace’s project and open its sketch in Obsidian |
 | `/tkflow-start My idea` | Open a new or existing project sketch |
-| `/tkflow-blueprint` | Inspect the saved drawing and draft an intent-rich blueprint |
+| `/tkflow-blueprint` | Generate Markdown rules/contracts and editable Excalidraw wireframes |
 | `/tkflow-refine` | Refine the blueprint and decision log |
 | `/tkflow-build` | Build the next ready vertical slice |
 | `/tkflow-status` | Brief Works / Try / Left / Deviations / Provisional |
@@ -119,6 +119,7 @@ tkflow/
   Projects/my-idea/
     Sketch.excalidraw.md
     Blueprint.md
+    Wireframes.excalidraw.md
     Decisions.md
     Status.md
     Evidence/
@@ -129,7 +130,20 @@ tkflow/
 
 The blueprint records purpose, provenance, why, scope, promises, ranked tiebreakers,
 behavior IDs, acceptance examples, vertical slices, and unknowns. Markdown is
-canonical; HTML is a generated reading view.
+canonical for precise rules; HTML is a generated reading view.
+
+`/tkflow-blueprint` asks the host model to produce both `Blueprint.md` and editable
+`Wireframes.excalidraw.md`. The drawing contains screens, states, controls and
+navigation linked to the same behavior IDs in the Markdown. Your original sketch
+is preserved. Refinement inspects both, reconciles discrepancies and records why.
+The Markdown includes rules/contracts and a screen-to-behavior map so fresh agents
+can continue from the three notes alone. A blank drawing is not a completed blueprint.
+
+The model saves scene JSON with the bundled `wireframe --from scene.json --expect
+SHA256 --open` helper, using the revision from `read --note Wireframes.excalidraw`.
+It then captures and visually checks the saved wireframe with `capture --note
+Wireframes.excalidraw`. Stale revisions are rejected; existing drawings are merged
+rather than replaced from memory.
 
 Before asking you a question, the agent searches the spec and log, then applies
 intent and tiebreakers to supported reversible choices and logs them provisionally.

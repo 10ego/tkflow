@@ -72,6 +72,15 @@ The output includes the SHA-256 revision token. Write proposed content to a temp
 UTF-8 file, then use `tkflow write --note Blueprint --from /absolute/file --expect TOKEN`.
 A conflict means reread and merge the user's edits; never retry with a fresh token
 without reconciling them. Use the same protection for all three notes.
+On **every /tkflow-blueprint**, produce BOTH the project-specific Markdown blueprint
+AND editable `Wireframes.excalidraw.md`; do not stop at a blank drawing, an image,
+or a promise to generate one. Follow [wireframe authoring](references/wireframes.md).
+For older projects run `begin` first to add the missing drawing without replacing
+saved notes. Capture/read existing wireframes before refinement. Preserve user
+elements and notes, reconcile both representations with shared B-IDs, and record
+the reviewed drawing hash and unresolved mismatches in Blueprint/Status. Open the
+generated wireframe after saving. If visual inspection is unavailable, report that
+verification pending; do not claim the drawing was reviewed.
 Run `tkflow preview` after refinement to regenerate the optional HTML view.
 
 ## Build

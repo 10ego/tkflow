@@ -123,3 +123,22 @@ at 0.2.0 and unrelated Claude settings were unchanged.
 - `git diff --check` passed. `claude plugin validate .` passed with listing warnings:
   marketplace description, missing directory-submission license, and icon. No public
   directory submission or licensing change was performed.
+
+## 0.4.0 — editable wireframe blueprints (2026-11-11)
+
+- Blueprint invocation now instructs the host model to generate both Markdown rules
+  and contracts and project-specific editable Excalidraw screens/states/navigation.
+  The helper is a scene writer, not an independent model service.
+- Projects gain `Wireframes.excalidraw.md` alongside the preserved source sketch;
+  resume adds missing drawings without replacing existing ones. Model-authored scene
+  JSON is saved through CLI with revision checks. Refinement retains captured scene
+  data, unrelated Markdown and embedded references. Visual/text reconciliation,
+  shared B-IDs and reviewed drawing hashes are required by the workflow.
+- `npm test`: 52 passed. `git diff --check` passed.
+- Live official Obsidian CLI created a synthetic drawing under
+  `Examples/wireframe-proof/`, saved five editable elements and recaptured them via
+  Excalidraw automation. Exported PNG was visually inspected: screen border, title,
+  empty state and action label render without clipping. This validates save/parse/
+  rendering, not a full model-driven project blueprint invocation in every host.
+- The three-note fresh-context packet remains unchanged; screen/state descriptions
+  and drawing references must also be recorded in Markdown for self-contained audits.

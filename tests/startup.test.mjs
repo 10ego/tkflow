@@ -23,7 +23,7 @@ test('initiation creates the project and brings Obsidian to its exact sketch',as
  const {vault}=fixture(t),b=new Fake(),revealed=[];const result=await begin(vault,'My idea',options(b,{reveal:(d,v,p)=>revealed.push({v,p})}));assert.equal(result.status,'opened');assert.equal(result.project,'my-idea');assert.ok(b.docs.has('Projects/my-idea/Blueprint.md'));assert.equal(b.opened.at(-1),'Projects/my-idea/Sketch.excalidraw.md');assert.deepEqual(revealed,[{v:vault,p:'Projects/my-idea/Sketch.excalidraw.md'}]);
 });
 test('resuming reopens the existing sketch and preserves saved edits',async t=>{
- const {vault}=fixture(t),b=new Fake();await begin(vault,'My idea',options(b));b.docs.set(projectPath('my-idea','Blueprint'),'Edited user intent');const result=await begin(vault,undefined,options(b));assert.equal(result.project,'my-idea');assert.equal(b.read(projectPath('my-idea','Blueprint')),'Edited user intent');assert.equal(b.sketchCount,1);
+ const {vault}=fixture(t),b=new Fake();await begin(vault,'My idea',options(b));b.docs.set(projectPath('my-idea','Blueprint'),'Edited user intent');const result=await begin(vault,undefined,options(b));assert.equal(result.project,'my-idea');assert.equal(b.read(projectPath('my-idea','Blueprint')),'Edited user intent');assert.equal(b.sketchCount,2);
 });
 test('current workspace selects its own project rather than an unrelated active project',async t=>{
  const {root,vault}=fixture(t),b=new Fake(),workspace=path.join(root,'my-app');fs.mkdirSync(workspace);await begin(vault,'Other idea',options(b));
@@ -37,7 +37,7 @@ test('same-named workspaces do not silently share a project',async t=>{
  const {root,vault}=fixture(t),b=new Fake();const first=path.join(root,'one/app'),second=path.join(root,'two/app');fs.mkdirSync(first,{recursive:true});fs.mkdirSync(second,{recursive:true});const a=await begin(vault,undefined,options(b,{workspace:first}));const c=await begin(vault,undefined,options(b,{workspace:second}));assert.equal(a.project,'app');assert.notEqual(c.project,a.project);
 });
 test('a stopped app is started once before project creation and reveal',async t=>{
- const {vault}=fixture(t),b=new Fake();let ready=false,launches=0;b.doctor=()=>{if(!ready)throw unreachable();return {automation:true};};const result=await begin(vault,'Idea',options(b,{processState:()=> 'stopped',launchApp:()=>{launches++;ready=true;}}));assert.equal(launches,1);assert.equal(result.status,'opened');assert.equal(b.sketchCount,1);
+ const {vault}=fixture(t),b=new Fake();let ready=false,launches=0;b.doctor=()=>{if(!ready)throw unreachable();return {automation:true};};const result=await begin(vault,'Idea',options(b,{processState:()=> 'stopped',launchApp:()=>{launches++;ready=true;}}));assert.equal(launches,1);assert.equal(result.status,'opened');assert.equal(b.sketchCount,2);
 });
 test('a running app with sandbox IPC failure is not searched for or relaunched',async t=>{
  const {vault}=fixture(t),b=new Fake();let launches=0,reveals=0;b.doctor=()=>{throw unreachable();};await assert.rejects(begin(vault,'Idea',options(b,{processState:()=> 'running',launchApp:()=>launches++,reveal:()=>reveals++})),e=>e.code==='OBSIDIAN_APP_UNREACHABLE'&&e.processState==='running');assert.equal(launches,0);assert.equal(reveals,0);assert.equal(b.docs.size,0);
@@ -52,7 +52,7 @@ test('missing Excalidraw reports setup instead of claiming an opened sketch',asy
  const {vault}=fixture(t),b=new Fake();b.doctor=()=>({automation:false});let revealed=false;await assert.rejects(begin(vault,'Idea',options(b,{reveal:()=>{revealed=true;}})),e=>e.code==='OBSIDIAN_EXCALIDRAW_UNAVAILABLE');assert.equal(revealed,false);assert.equal(b.docs.size,0);
 });
 test('a reveal failure leaves a reusable project and does not report success',async t=>{
- const {vault}=fixture(t),b=new Fake();await assert.rejects(begin(vault,'Idea',options(b,{reveal:()=>{throw Error('reveal failed');}})),/reveal failed/);assert.ok(b.docs.has('Projects/idea/Blueprint.md'));await begin(vault,'Idea',options(b));assert.equal(b.sketchCount,1);
+ const {vault}=fixture(t),b=new Fake();await assert.rejects(begin(vault,'Idea',options(b,{reveal:()=>{throw Error('reveal failed');}})),/reveal failed/);assert.ok(b.docs.has('Projects/idea/Blueprint.md'));await begin(vault,'Idea',options(b));assert.equal(b.sketchCount,2);
 });
 test('a normal diagnostic probe never starts an application',async()=>{
  let launches=0;await assert.rejects(connect({doctor:()=>{throw unreachable();}},discovery,{launchApp:()=>launches++}),/unreachable/);assert.equal(launches,0);

@@ -8,6 +8,7 @@ import { randomUUID } from 'node:crypto';
 import { setTimeout } from 'node:timers/promises';
 import { pathToFileURL } from 'node:url';
 import { Obsidian, defaultVault, initVault, registerVault, activeProject, projectPath, digest, saveArtifact, handoff, checkpoint, NOTES } from './runtime.mjs';
+import { saveWireframes } from './wireframes.mjs';
 import { renderHTML } from './preview.mjs';
 import { locateObsidian, requireCLI, ObsidianCLIError } from './obsidian-cli.mjs';
 import { begin, connect } from './startup.mjs';
@@ -17,8 +18,8 @@ export async function main(argv = process.argv.slice(2)) {
     vault: { type:'string' }, workspace:{type:'string'}, project:{type:'string'}, note:{type:'string',default:'Blueprint'}, from:{type:'string'}, expect:{type:'string'}, split:{type:'boolean'}, open:{type:'boolean'}, launch:{type:'boolean'}, message:{type:'string'}, help:{type:'boolean',short:'h'},
   }});
   const [command, ...rest] = positionals;
-  if (args.help || !command) { console.log('tkflow plugin helper\n\nCommands: begin [name], locate, init, register, doctor [--launch], setup-plugin, start [name], read, write, open, capture, preview, handoff, checkpoint\nOptions: --vault PATH --workspace PATH --project NAME --note Blueprint|Decisions|Status --from FILE --expect SHA256 --split --open --message TEXT\nbegin connects, creates or resumes a project, and opens its sketch in Obsidian. start is an alias.\nlocate discovers the CLI without app IPC. doctor reports connection errors with a bounded recovery path.\nInstall the workflow through your host plugin manager; no standalone installer is required.'); return; }
-  const supported = ['begin','locate','init','register','doctor','setup-plugin','start','read','write','open','capture','preview','handoff','checkpoint'];
+  if (args.help || !command) { console.log('tkflow plugin helper\n\nCommands: begin [name], locate, init, register, doctor [--launch], setup-plugin, start [name], read, write, open, capture, wireframe, preview, handoff, checkpoint\nOptions: --vault PATH --workspace PATH --project NAME --note Blueprint|Decisions|Status|Sketch.excalidraw|Wireframes.excalidraw --from FILE --expect SHA256 --split --open --message TEXT\nbegin connects, creates or resumes a project, and opens its sketch in Obsidian. start is an alias.\nlocate discovers the CLI without app IPC. doctor reports connection errors with a bounded recovery path.\nInstall the workflow through your host plugin manager; no standalone installer is required.'); return; }
+  const supported = ['begin','locate','init','register','doctor','setup-plugin','start','read','write','open','capture','wireframe','preview','handoff','checkpoint'];
   if (!supported.includes(command)) throw Error('Unknown command: ' + command);
   let vault = args.vault || process.env.TKFLOW_VAULT || defaultVault();
   if (vault.startsWith('~/')) vault = path.join(os.homedir(), vault.slice(2));
@@ -52,19 +53,26 @@ export async function main(argv = process.argv.slice(2)) {
   }
   const project = activeProject(vault,args.project);
   if (['read','write','open'].includes(command)) {
-    if (![...NOTES,'Sketch.excalidraw'].includes(args.note)) throw Error('Choose Blueprint, Decisions, Status, or Sketch.excalidraw.');
+    if (![...NOTES,'Sketch.excalidraw','Wireframes.excalidraw'].includes(args.note)) throw Error('Choose Blueprint, Decisions, Status, Sketch.excalidraw, or Wireframes.excalidraw.');
     const file = projectPath(project,args.note);
     if (command === 'read') { const content=bridge.read(file); console.log('SHA256: ' + digest(content)); process.stdout.write(content); }
     if (command === 'open') console.log(bridge.open(file,args.split));
     if (command === 'write') {
-      if (args.note === 'Sketch.excalidraw') throw Error('Preserve the original sketch; edit it in Obsidian.');
+      if (args.note.endsWith('.excalidraw')) throw Error('Preserve the original sketch. Use wireframe with scene JSON and --expect to refine Wireframes.excalidraw.');
       if (!args.from || !args.expect) throw Error('write requires --from FILE and --expect SHA256.');
       const content=fs.readFileSync(args.from,'utf8');bridge.replace(file,content,args.expect);console.log('Saved. SHA256: ' + digest(content));
     }
+  } else if (command === 'wireframe') {
+    if (!args.from || !args.expect) throw Error('wireframe requires --from scene.json and --expect SHA256 from read --note Wireframes.excalidraw.');
+    const revision=saveWireframes(bridge,projectPath(project,'Wireframes.excalidraw'),JSON.parse(fs.readFileSync(args.from,'utf8')),args.expect);
+    console.log('Saved wireframes. SHA256: '+revision);
+    if(args.open) bridge.open(projectPath(project,'Wireframes.excalidraw'));
   } else if (command === 'capture') {
-    const result=bridge.capture(projectPath(project,'Sketch.excalidraw'));
+    const drawing=args.note==='Blueprint'?'Sketch.excalidraw':args.note;
+    if (!['Sketch.excalidraw','Wireframes.excalidraw'].includes(drawing)) throw Error('capture supports Sketch.excalidraw or Wireframes.excalidraw.');
+    const result=bridge.capture(projectPath(project,drawing));
     result.scene.elements=result.scene.elements.filter(e=>!e.isDeleted);result.scene.tkflowSource=result.source;
-    const base=`Projects/${project}/Evidence/sketch-${Date.now()}-${randomUUID().slice(0,6)}`;
+    const base=`Projects/${project}/Evidence/${drawing.split('.')[0].toLowerCase()}-${Date.now()}-${randomUUID().slice(0,6)}`;
     const scene=saveArtifact(vault,base+'.json',JSON.stringify(result.scene,null,2));
     const svg=saveArtifact(vault,base+'.svg',result.svg);
     const encoded=result.png.split(',').at(-1);

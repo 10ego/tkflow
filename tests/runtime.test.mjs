@@ -18,8 +18,9 @@ class FakeVault {
   open(file){this.opened.push(file);return file;}
 }
 test('initialize and resume preserves saved user intent and the sketch',t=>{
- const {vault}=fixture(t);initVault(vault);const b=new FakeVault();start(vault,b,'My idea');b.docs.set('Projects/my-idea/Blueprint.md','User intent');start(vault,b);
- assert.equal(b.read('Projects/my-idea/Blueprint.md'),'User intent');assert.equal(b.sketches,1);assert.equal(activeProject(vault),'my-idea');assert.equal(b.opened.at(-1),'Projects/my-idea/Sketch.excalidraw.md');
+ const {vault}=fixture(t);initVault(vault);const b=new FakeVault();start(vault,b,'My idea');b.docs.set('Projects/my-idea/Blueprint.md','User intent');b.docs.set('Projects/my-idea/Wireframes.excalidraw.md','User wireframe edits');start(vault,b);
+ assert.equal(b.read('Projects/my-idea/Wireframes.excalidraw.md'),'User wireframe edits');
+ assert.equal(b.read('Projects/my-idea/Blueprint.md'),'User intent');assert.equal(b.sketches,2);assert.equal(activeProject(vault),'my-idea');assert.equal(b.opened.at(-1),'Projects/my-idea/Sketch.excalidraw.md');
  assert.equal(b.read('Home.md').split('[[Projects/my-idea/Blueprint|').length,2);
 });
 test('actual projects are direct children and navigation precedes references',t=>{
