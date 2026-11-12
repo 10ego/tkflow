@@ -49,3 +49,13 @@ test('generated IDs survive Obsidian text block indexing',()=>{
 test('shipped native component library covers the complete renderer vocabulary',async()=>{
  const {componentLibrary}=await import('../src/component-library.mjs');const {COMPONENTS}=await import('../src/blueprint-model.mjs');const library=componentLibrary();assert.deepEqual(library.libraryItems.map(i=>i.name),COMPONENTS);assert.deepEqual(JSON.parse(fs.readFileSync(new URL('../templates/tkflow-components.excalidrawlib',import.meta.url))),library);assert.ok(library.libraryItems.every(i=>i.elements.length&&i.elements.every(e=>!e.customData&&!e.link)));
 });
+
+test('missing ownership manifest blocks regeneration and canvas state is preserved',()=>{
+ const scene=renderBlueprint(sample(),'studio').scene;
+ const noManifest=structuredClone(scene);noManifest.elements=noManifest.elements.filter(e=>!e.customData.tkflow.manifest);assert.throws(()=>mergeRenderedScene(scene,noManifest),/manifest/);
+ const existing={...scene,appState:{viewBackgroundColor:'#ffeeaa'}};assert.equal(mergeRenderedScene(scene,existing).appState.viewBackgroundColor,'#ffeeaa');
+});
+test('behavior references must resolve and light buttons have readable labels',()=>{
+ const m=sample();m.screens[0].components[1].behaviors=['B-999'];assert.throws(()=>validateBlueprint(m),/defined B-NNN/);
+ const light=sample();light.theme.primary='#ffffff';const scene=renderBlueprint(light,'studio').scene;assert.equal(scene.elements.find(e=>e.customData.tkflow.key==='component/brief-submit/label').strokeColor,'#000000');
+});

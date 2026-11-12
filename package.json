@@ -1,6 +1,6 @@
 {
   "name": "tkflow",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
   "description": "Obsidian-first blueprints, vertical slices, and fresh-agent continuation",
@@ -27,7 +27,8 @@
     ".agents"
   ],
   "scripts": {
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "build:components": "node scripts/build-components.mjs"
   },
   "dependencies": {
     "@opencode/plugin": "2.0.17"

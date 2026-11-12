@@ -32,7 +32,9 @@ Do not assume a generic principle settles an unrelated product choice.
 
 ## Journeys and behavior
 
-### B-001 — First useful outcome
+### B-001
+
+**First useful outcome**
 
 - Provenance: unresolved (use stated / inferred / unresolved).
 - Source: sketch element IDs or user statement.
@@ -47,6 +49,13 @@ Do not assume a generic principle settles an unrelated product choice.
 For each B-ID, record inputs, allowed actions, permissions, state transitions,
 validation, persistence, and observable success/failure/recovery guarantees.
 Separate approved rules from provisional interpretations and explain why.
+
+## Visual direction
+
+- Source observations and reference element IDs: Unresolved.
+- Platform and why: Unresolved.
+- Palette roles, tone, density and typography: Unresolved.
+- Stated constraints versus provisional visual choices: Unresolved.
 
 ## Wireframe map
 

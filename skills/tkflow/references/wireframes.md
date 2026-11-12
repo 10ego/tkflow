@@ -1,50 +1,107 @@
-# Generate the editable wireframe blueprint
+# Generate a designed, editable blueprint
 
-The host's model authors the content; the helper saves an Excalidraw scene. No
-separate model service, SVG-to-image substitution, or placeholder-only output.
+On `/tkflow-blueprint`, the host model produces BOTH Markdown rules/contracts and
+an editable Excalidraw blueprint board. The default path is semantic composition:
+the model designs the experience; the component renderer handles geometry. Do not
+settle for a blank drawing, a screenshot, or a few arbitrary labeled rectangles.
 
-1. Inspect the original sketch's scene AND exported PNG. Read Blueprint, Decisions,
-   and Status. Identify the screens/states/navigation needed for supported behavior.
-   Do not invent product requirements to fill visual space. For a blank sketch with
-   no product input, report blocked rather than fabricate a design.
-2. `begin` ensures both drawings exist, preserving existing files. Read
-   `read --note Wireframes.excalidraw` for the SHA256 revision. Capture the existing
-   drawing with `capture --note Wireframes.excalidraw` and inspect PNG plus JSON.
-   On refinement, use that complete scene as the base and merge user edits. Preserve
-   all existing element IDs, files, metadata, and unrelated content. Do not regenerate
-   the whole drawing from memory. Save editor/drawing changes before capturing.
-3. Write model-authored JSON to a temporary file: `{ "elements": [...] }` for a new
-   drawing, or the merged full captured scene on refinement. Use editable rectangles,
-   text and arrows for screens, controls and transitions. Label screens/states and
-   annotate relevant controls with B-IDs and links to the Markdown behavior heading.
-   Every element needs a unique id and finite x/y/width/height; text needs text.
-   The helper supplies ordinary Excalidraw defaults for concise new elements:
+## Read the evidence first
 
-   ```json
-   {"elements":[
-     {"id":"screen-main","type":"rectangle","x":0,"y":0,"width":360,"height":640},
-     {"id":"screen-title","type":"text","x":20,"y":20,"width":300,"height":25,
-      "text":"B-001 — Main screen",
-      "link":"[[Projects/PROJECT/Blueprint#B-001 — First useful outcome]]"}
-   ]}
-   ```
+Inspect the original sketch's scene AND exported PNG. Read Blueprint, Decisions,
+and Status. Inspect reference images individually when the board overview is too
+small to understand them; use saved source attachments rather than guessing from
+thumbnails. If an attachment is unavailable, name that gap. Distinguish product
+requirements from visual inspiration. Never adopt UI or text in an inspiration
+image as an approved feature without evidence.
 
-   This is a format example, not a sufficient generated wireframe. Create meaningful
-   project-specific screens and states. Include empty/loading/error/recovery states
-   when required by the spec. Distinguish provisional visual choices from stated ones.
-4. Save with `wireframe --from /absolute/scene.json --expect SHA256 --open`.
-   The helper updates only the derived drawing, using the same guarded live CLI
-   revision check as note writes. On conflict, reread/capture and merge; do not simply
-   get a fresh token and overwrite the user's work. Never write the source Sketch.
-5. Capture the saved wireframe again and inspect its PNG to check labels, clipping,
-   states and navigation. Repair layout if needed. Update Blueprint's wireframe map
-   with element IDs, B-IDs, A-IDs, and the final capture's source SHA256. Link back to
-   Wireframes. Keep rules, contracts, and screen/state descriptions in Markdown so
-   the three-note fresh-agent audit remains self-contained.
-6. In refinement, compare the current drawing hash with the recorded reviewed hash.
-   Reconcile visual and text edits; record reasons/decisions and acceptance changes.
-   Log unresolved mismatches and block only affected slices. Markdown governs precise
-   rules, but never silently discard a visual edit because of that precedence.
+Write a short interpretation: person/job/outcome, source observations, platform,
+visual character, constraints, and provisional choices. No product input means
+report the missing input rather than fabricate an app. Do not force every app into
+a fixed number of screens. Include the screens/states the supported journey needs.
 
-The helper does not perform a transactional update across drawing and Markdown.
-If one save fails, report the partial state in Status and reconcile before building.
+## Author the semantic model
+
+Read `templates/blueprint-model.example.json` at the plugin root for a complete
+synthetic example, and [model format](blueprint-model.md) for the contract. Replace
+its content with the user's product; never reuse the example as their requirements.
+
+Use stable screen/component/flow/entity/decision IDs and shared B-NNN rule IDs.
+Provide realistic sample labels and rows, source observations and provenance,
+reasons for rules, named transitions, visual tokens, and unresolved behavior choices.
+Do not silently promote an inferred visual choice into a non-negotiable requirement.
+Define the supported rules/contracts and acceptance criteria in Blueprint.md first,
+then author model JSON consistent with them. The model is rendering input, not a
+second independent authority. Keep exact `### B-NNN` headings in Markdown so drawing
+links resolve; put the behavior's human-readable title beneath its heading.
+
+Use the component vocabulary to design screens with deliberate hierarchy:
+- Header/navigation/sidebar establish where the user is and their main action.
+- Forms, tables, lists, cards, stats and controls contain product-specific content.
+- Empty/loading/error/dialog components describe relevant states. Label alternate
+  states as alternatives; they are explanatory panels, not all simultaneous UI.
+- For desktop, pair half-width sections and group thirds where it aids comparison.
+  For mobile, the renderer reflows content to a single column. Choose platform from
+  intent; do not inherit a desktop-only assumption from a reference.
+- Navigation is consistent across screens; flow labels name user actions and their
+  B-IDs. Scope fields, rule reasons and entity descriptions should explain why.
+- Palette primary/accent/surface and density/tone reflect the supplied design evidence.
+  The wireframe uses a consistent monospace type style; final app typography belongs
+  in Markdown visual guidance. Color does not substitute for labels or state meaning.
+
+## Compose and preserve saved edits
+
+1. `begin` creates missing project drawings while preserving saved content.
+2. Read `read --note Wireframes.excalidraw` for its SHA256 token. On refinement,
+   capture the drawing with `capture --note Wireframes.excalidraw` and inspect its
+   PNG and scene, including user annotations, before proposing changes.
+3. Save model JSON to a temporary file. Run:
+
+   `compose --from /absolute/model.json --expect SHA256 --open`
+
+   The helper validates the model, captures the saved drawing, renders editable
+   elements, and uses guarded live CLI replacement. Its output gives screen/component
+   bounds and the saved model evidence path. It retains unowned annotations on a
+   managed drawing, and refuses regeneration if managed elements were moved, changed,
+   deleted or removed. Stale revisions are refused. The original Sketch is never
+   a generated output. Saved editor/drawing changes are required before capture.
+4. A conflict is a merge task. Inspect the captured scene and the user's edits;
+   reconcile intent/rules and record why. Use `wireframe --from /absolute/scene.json
+   --expect SHA256 --open` for a deliberate merged scene, preserving existing IDs,
+   files, metadata and unrelated notes. Do not remove ownership metadata or refresh
+   the revision token merely to bypass protection. Boards made before semantic
+   composition have no ownership baseline and require this same deliberate merge.
+5. If using the low-level wireframe helper to add a component outside the current
+   vocabulary, keep it editable and maintain the same visual conventions. Report
+   the unsupported component rather than silently substituting an unrelated one.
+
+The native `templates/tkflow-components.excalidrawlib` can optionally be imported
+into Excalidraw for manual reuse. It requires no extra Obsidian plugin. Automated
+composition uses the same renderer and needs no manual library import.
+
+## Required quality pass
+
+Capture the saved result again. Inspect the overview AND each screen at a useful
+zoom or resolution. Large boards cannot be reviewed from a tiny overview alone;
+use the SVG with browser zoom or render focused screen views as temporary evidence.
+Report visual review pending if the host cannot inspect images; never claim success
+based only on the element JSON.
+
+Before presenting the blueprint, check and repair:
+- The journey, screen order and primary actions are clear at overview scale.
+- Close-up labels, tables and forms are legible, with no overlap or clipped content.
+- Navigation and terminology agree across screens. Data/examples fit the product.
+- Important actions have destinations or defined observable results.
+- Relevant empty/loading/error/permission/recovery cases are represented or explicitly
+  deferred. Alternate states are identified; a wireframe does not prove interactions.
+- Screen/component B-IDs, Markdown contracts and acceptance scenarios agree.
+- Source observations, visual assumptions and costly open decisions are distinguished.
+
+Record screen/state descriptions and the screen/component-to-B/A-ID map in Markdown,
+plus the final capture's source SHA256 and model evidence path. This keeps the
+three-note fresh-agent audit self-contained. Describe what the user can inspect,
+what is provisional, and any unreviewed gaps in a short status update.
+
+On refinement compare drawing hashes and reconcile changes across Markdown and
+wireframes. Record disagreements and block only the affected slices. The two saves
+are not transactional: if one fails, record the partial state and reconcile before
+building. Never silently discard a visual edit because Markdown governs precise rules.

@@ -139,11 +139,28 @@ is preserved. Refinement inspects both, reconciles discrepancies and records why
 The Markdown includes rules/contracts and a screen-to-behavior map so fresh agents
 can continue from the three notes alone. A blank drawing is not a completed blueprint.
 
-The model saves scene JSON with the bundled `wireframe --from scene.json --expect
-SHA256 --open` helper, using the revision from `read --note Wireframes.excalidraw`.
+The model normally authors a structured product model and uses the bundled
+`compose --from model.json --expect SHA256 --open` helper, using the revision from
+`read --note Wireframes.excalidraw`. The renderer supplies a consistent component
+library, wrapping, spacing, desktop/mobile layouts, named flow arrows, and intent,
+data, rulebook and decision panels. The lower-level `wireframe` helper remains
+available for deliberate scene merges and custom components.
 It then captures and visually checks the saved wireframe with `capture --note
 Wireframes.excalidraw`. Stale revisions are rejected; existing drawings are merged
-rather than replaced from memory.
+rather than replaced from memory. Regeneration refuses to overwrite modified or
+deleted generated elements; it preserves manual annotations on managed boards.
+
+The 16 component types include navigation, headers, inputs/forms, cards, lists,
+tables, stats, dialogs and empty/loading/error states. The packaged
+`templates/tkflow-components.excalidrawlib` is also available for optional manual
+import into Excalidraw. Automated composition needs no library import or extra
+Obsidian plugin. See the [model contract](skills/tkflow/references/blueprint-model.md)
+and [complete synthetic example](templates/blueprint-model.example.json).
+
+The model must inspect an overview and screen details before presenting the result.
+This improves repeatable composition; it does not validate the product requirements
+or turn wireframe controls into a working application. Rules/contracts remain in
+Markdown, and rendering input is saved as versioned evidence.
 
 Before asking you a question, the agent searches the spec and log, then applies
 intent and tiebreakers to supported reversible choices and logs them provisionally.
@@ -188,6 +205,7 @@ saved content; save editor and drawing changes before refinement or capture.
 ```sh
 npm ci --ignore-scripts
 npm test
+npm run build:components
 claude plugin validate .
 ```
 

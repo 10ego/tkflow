@@ -119,12 +119,13 @@ export function mergeRenderedScene(generated,existing) {
   const elements=existing.elements||[];
   const managed=elements.filter(e=>e.customData?.tkflow?.fingerprint);
   const manifest=managed.find(e=>e.customData.tkflow.manifest)?.customData.tkflow.manifest;
+  if(managed.length&&!manifest)throw Error('Wireframe conflict: renderer ownership manifest is missing. Capture and merge manually.');
   if(manifest?.some(id=>!elements.some(e=>e.id===id)))throw Error('Wireframe conflict: generated elements were removed. Capture and merge the drawing manually with wireframe.');
   for(const e of managed)if(e.isDeleted||elementFingerprint(e)!==e.customData.tkflow.fingerprint)throw Error('Wireframe conflict: saved element '+e.id+' was edited. Capture and merge with wireframe; compose will not overwrite it.');
   const manual=elements.filter(e=>!e.customData?.tkflow?.fingerprint);
   const ids=new Set(generated.elements.map(e=>e.id));if(manual.some(e=>ids.has(e.id)))throw Error('Wireframe conflict: element ID collision.');
   if(!managed.length&&manual.some(e=>!e.isDeleted))throw Error('Existing wireframe has no renderer ownership record. Capture and merge it with wireframe instead of replacing it.');
-  return {...existing,...generated,files:{...existing.files,...generated.files},elements:[...generated.elements,...manual]};
+  return {...existing,...generated,appState:{...generated.appState,...existing.appState},files:{...existing.files,...generated.files},elements:[...generated.elements,...manual]};
 }
 export function composeWireframes(bridge,file,model,project,expected) {
   const generated=renderBlueprint(model,project);

@@ -142,3 +142,35 @@ at 0.2.0 and unrelated Claude settings were unchanged.
   rendering, not a full model-driven project blueprint invocation in every host.
 - The three-note fresh-context packet remains unchanged; screen/state descriptions
   and drawing references must also be recorded in Markdown for self-contained audits.
+
+## 0.5.0 — semantic composition and component library (2026-11-11)
+
+- The host model authors a validated v1 product model; `compose` renders editable
+  Excalidraw screens with reusable components rather than asking for arbitrary
+  element coordinates. The board includes intent/visual direction, ordered screens,
+  labeled flow routes, domain data, rule rationale/provenance and open decisions.
+- Sixteen components support desktop full/half/third layouts and mobile single-column
+  reflow. Content wraps and screen height expands rather than silently truncating.
+  Packaged `templates/tkflow-components.excalidrawlib` exposes the same vocabulary
+  for optional manual reuse; automated composition needs no import or extra plugin.
+- Repeated composition preserves manual annotations and canvas state on managed
+  boards, and refuses changed/deleted generated elements, missing ownership records,
+  stale revisions and unknown legacy ownership. Deliberate merges still use the
+  guarded low-level scene writer. A manually authored/older drawing is never silently
+  replaced with a regenerated board.
+- Live official Obsidian CLI proof in `Examples/component-library-050/`: the synthetic
+  Studio Desk model rendered 3 screens and 168 editable elements. A native capture
+  followed by unchanged regeneration passed. A manual text edit was then saved;
+  regeneration refused it. The test edit was deliberately restored afterward.
+- Overview, desktop screen detail, and mobile PNG exports were visually inspected.
+  Evidence: `Overview.png`, `Detail.png`, `Mobile.png` in that example folder. These
+  verify rendering and saved-edit behavior, not a working product or a full independent
+  model-driven invocation on new user input. Native library import was not exercised.
+- Live checks found Excalidraw rewrites long IDs and derives text dimensions/fields.
+  Stable 8-character IDs and fingerprints that exclude only derived/runtime fields
+  now survive the round trip. Text-index serialization was also corrected to avoid
+  leading blank lines. Visible text/style/position changes remain protected.
+- `npm test`: 65 passed. Skill validators passed for tkflow and tkflow-blueprint.
+  `npm pack --dry-run --json` includes renderer, schema guidance, full example and
+  native library. `git diff --check` passed. Claude plugin validation passed with
+  existing directory-listing warnings (license, icon, marketplace description).

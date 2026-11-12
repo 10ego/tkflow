@@ -4,7 +4,7 @@ import { ROOT } from '../src/runtime.mjs';
 export const MODES = {
   tkflow: ['Create or resume a project and open its sketch', 'execute the bundled begin command to create or resume the project and bring Obsidian forward at its sketch; interpret any explicit workflow mode in the arguments'],
   'tkflow-start': ['Create or resume a project and open its sketch', 'execute the bundled begin command for the named project or current workspace, then open its exact Obsidian sketch'],
-  'tkflow-blueprint': ['Draft an intent-rich blueprint', 'interpret the saved scene AND image, then generate BOTH the rules/contracts Markdown blueprint and editable Excalidraw wireframes with shared behavior IDs'],
+  'tkflow-blueprint': ['Draft an intent-rich blueprint', 'interpret the saved scene AND image, then generate BOTH the rules/contracts Markdown blueprint and semantic component model; compose editable Excalidraw wireframes with shared behavior IDs, then visually review overview and screen details'],
   'tkflow-refine': ['Refine the blueprint and rationale', 'reconcile the Markdown rules/contracts and editable Excalidraw wireframes, preserving saved user edits'],
   'tkflow-build': ['Build the next ready slice', 'build the next ready vertical slice and verify its acceptance behavior'],
   'tkflow-status': ['Brief progress in product terms', 'read Status and report Works / Try / Left / Deviations / Provisional'],
